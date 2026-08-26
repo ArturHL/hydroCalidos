@@ -29,8 +29,18 @@ export function TripsProvider({ children }) {
     return trip
   }
 
+  function updateTrip(id, changes) {
+    setTrips((prev) => {
+      const next = prev.map((trip) =>
+        trip.id === id ? { ...trip, ...changes } : trip,
+      )
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   return (
-    <TripsContext.Provider value={{ trips, addTrip }}>
+    <TripsContext.Provider value={{ trips, addTrip, updateTrip }}>
       {children}
     </TripsContext.Provider>
   )

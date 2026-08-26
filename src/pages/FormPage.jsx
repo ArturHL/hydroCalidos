@@ -100,6 +100,7 @@ function FormPage() {
         <label>
           Origen (banco de material)
           <select
+            name="origen"
             value={form.origen}
             onChange={(e) => updateField('origen', e.target.value)}
           >
@@ -115,6 +116,7 @@ function FormPage() {
         <label>
           Material
           <select
+            name="material"
             value={form.material}
             onChange={(e) => updateField('material', e.target.value)}
             disabled={!form.origen}
@@ -133,6 +135,7 @@ function FormPage() {
         <label>
           Destino
           <select
+            name="destino"
             value={form.destino}
             onChange={(e) => updateField('destino', e.target.value)}
           >
@@ -149,6 +152,7 @@ function FormPage() {
           Distancia (km)
           <input
             type="number"
+            name="distancia"
             min="0"
             value={form.distancia}
             onChange={(e) => updateField('distancia', e.target.value)}
@@ -162,6 +166,7 @@ function FormPage() {
           <label>
             Justificación del cambio de distancia
             <textarea
+              name="justificacion"
               value={form.justificacion}
               onChange={(e) => updateField('justificacion', e.target.value)}
               rows={3}
@@ -173,6 +178,7 @@ function FormPage() {
           Placa
           <input
             type="text"
+            name="placa"
             value={form.placa}
             onChange={(e) => updateField('placa', e.target.value)}
           />
@@ -182,6 +188,7 @@ function FormPage() {
           Capacidad (m³)
           <input
             type="number"
+            name="capacidad"
             min="0"
             value={form.capacidad}
             onChange={(e) => updateField('capacidad', e.target.value)}
@@ -192,6 +199,7 @@ function FormPage() {
           Nombre del operador
           <input
             type="text"
+            name="operador"
             value={form.operador}
             onChange={(e) => updateField('operador', e.target.value)}
           />
@@ -201,6 +209,7 @@ function FormPage() {
           Nombre del checador
           <input
             type="text"
+            name="checador"
             value={form.checador}
             onChange={(e) => updateField('checador', e.target.value)}
           />
@@ -210,6 +219,7 @@ function FormPage() {
           Coordenadas de salida
           <input
             type="text"
+            name="coordSalida"
             placeholder="lat, lng"
             value={form.coordSalida}
             onChange={(e) => updateField('coordSalida', e.target.value)}
@@ -220,6 +230,7 @@ function FormPage() {
           Coordenadas de llegada
           <input
             type="text"
+            name="coordLlegada"
             placeholder="lat, lng"
             value={form.coordLlegada}
             onChange={(e) => updateField('coordLlegada', e.target.value)}
