@@ -44,10 +44,12 @@ function TicketPage() {
       </dl>
 
       <div className="ticket-actions no-print">
-        <button type="button" onClick={() => window.print()}>
+        <button type="button" className="btn-secondary" onClick={() => window.print()}>
           Imprimir
         </button>
-        <Link to="/formulario">Registrar otro viaje</Link>
+        <Link to="/formulario" className="btn-primary">
+          Registrar otro viaje
+        </Link>
       </div>
     </section>
   )

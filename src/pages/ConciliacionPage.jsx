@@ -123,6 +123,7 @@ function EnProceso() {
         />
         <button
           type="button"
+          className="btn-primary"
           onClick={() => {
             enviarPropuesta({ autor: role, ediciones, mensaje })
             setMensaje('')
@@ -182,6 +183,7 @@ function EnProceso() {
         <div className="ticket-actions">
           <button
             type="button"
+            className="btn-accept"
             onClick={() =>
               aceptarPropuesta({
                 autor: role,
@@ -197,6 +199,7 @@ function EnProceso() {
           </button>
           <button
             type="button"
+            className="btn-secondary"
             onClick={() => {
               setEdiciones(proposal.ediciones)
               setContraofertando(true)
@@ -210,6 +213,7 @@ function EnProceso() {
       {esMiTurno && contraofertando && (
         <button
           type="button"
+          className="btn-primary"
           onClick={() => {
             enviarPropuesta({ autor: role, ediciones, mensaje })
             setMensaje('')

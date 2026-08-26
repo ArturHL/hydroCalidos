@@ -109,6 +109,7 @@ function AcuerdoActual() {
             <div className="ticket-actions">
               <button
                 type="button"
+                className="btn-primary"
                 onClick={() => {
                   enviarPropuesta({ autor: role, tarifas, mensaje })
                   setEditando(false)
@@ -117,7 +118,7 @@ function AcuerdoActual() {
               >
                 Enviar solicitud de revisión
               </button>
-              <button type="button" onClick={() => setEditando(false)}>
+              <button type="button" className="btn-secondary" onClick={() => setEditando(false)}>
                 Cancelar
               </button>
             </div>
@@ -127,6 +128,7 @@ function AcuerdoActual() {
             <TarifasTable tarifas={vigente} />
             <button
               type="button"
+              className="btn-primary"
               onClick={() => {
                 setTarifas(vigente)
                 setEditando(true)
@@ -186,11 +188,12 @@ function AcuerdoActual() {
 
       {esMiTurno && !editando && (
         <div className="ticket-actions">
-          <button type="button" onClick={() => aceptarPropuesta({ autor: role })}>
+          <button type="button" className="btn-accept" onClick={() => aceptarPropuesta({ autor: role })}>
             Aceptar revisión
           </button>
           <button
             type="button"
+            className="btn-secondary"
             onClick={() => {
               setTarifas(proposal.tarifas)
               setEditando(true)
@@ -204,6 +207,7 @@ function AcuerdoActual() {
       {esMiTurno && editando && (
         <button
           type="button"
+          className="btn-primary"
           onClick={() => {
             enviarPropuesta({ autor: role, tarifas, mensaje })
             setEditando(false)

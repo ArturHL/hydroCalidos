@@ -1,15 +1,37 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --border: #e5ddcf;
+  --border-strong: #d5c9b3;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --text: #5c574c;
+  --text-h: #292520;
+  --text-muted: #928c7d;
 
-  font: 16px/145% var(--sans);
+  --accent: #3e5c66;
+  --accent-hover: #314951;
+  --accent-bg: rgba(62, 92, 102, 0.08);
+  --accent-border: rgba(62, 92, 102, 0.32);
+  --accent-contrast: #fbfaf7;
+
+  --success: #4f7a5c;
+  --success-bg: rgba(79, 122, 92, 0.12);
+  --success-border: rgba(79, 122, 92, 0.35);
+
+  --warning: #a86a34;
+  --warning-bg: rgba(168, 106, 52, 0.13);
+  --warning-border: rgba(168, 106, 52, 0.35);
+
+  --danger: #a04a3d;
+  --danger-bg: rgba(160, 74, 61, 0.1);
+  --danger-border: rgba(160, 74, 61, 0.35);
+
+  --shadow-sm: 0 1px 2px rgba(41, 37, 32, 0.06);
+  --shadow-md: 0 4px 16px rgba(41, 37, 32, 0.08);
+
+  --sans: 'Segoe UI', system-ui, Roboto, sans-serif;
+
+  font: 15px/1.55 var(--sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -21,13 +43,35 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    --bg: #1c1a17;
+    --surface: #252220;
+    --border: #3a352c;
+    --border-strong: #4c453a;
+
+    --text: #b6afa1;
+    --text-h: #f2ede3;
+    --text-muted: #857e70;
+
+    --accent: #86adb8;
+    --accent-hover: #9dbdc7;
+    --accent-bg: rgba(134, 173, 184, 0.14);
+    --accent-border: rgba(134, 173, 184, 0.4);
+    --accent-contrast: #16211f;
+
+    --success: #8fb89b;
+    --success-bg: rgba(143, 184, 155, 0.14);
+    --success-border: rgba(143, 184, 155, 0.38);
+
+    --warning: #d8a165;
+    --warning-bg: rgba(216, 161, 101, 0.16);
+    --warning-border: rgba(216, 161, 101, 0.4);
+
+    --danger: #cb8072;
+    --danger-bg: rgba(203, 128, 114, 0.16);
+    --danger-border: rgba(203, 128, 114, 0.4);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -47,6 +91,16 @@ body {
 
 h1, h2 {
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-h);
   margin: 0 0 16px;
+}
+
+h1 {
+  font-size: 26px;
+}
+
+h2 {
+  font-size: 17px;
+  margin-top: 32px;
 }

@@ -38,6 +38,8 @@ function App() {
   return (
     <>
       <header className="app-header no-print">
+        <span className="brand">hydroCalidos</span>
+
         <nav className="app-nav">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to}>

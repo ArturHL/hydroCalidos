@@ -239,7 +239,9 @@ function FormPage() {
 
         {error && <p className="field-error">{error}</p>}
 
-        <button type="submit">Generar ticket</button>
+        <button type="submit" className="btn-primary">
+          Generar ticket
+        </button>
       </form>
     </section>
   )
