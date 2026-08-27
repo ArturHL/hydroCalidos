@@ -11,8 +11,13 @@ import {
 } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
 import { PLACAS_AUTORIZADAS } from '../data/mockCamiones.js'
+import { representanteDeOperador } from '../data/mockOperadores.js'
 
 const EASE = [0.16, 1, 0.3, 1]
+
+// El Checador ya inició sesión con su propio usuario — este campo no se
+// escribe a mano, es quien está usando la app en este momento.
+const CHECADOR_ACTUAL = 'Lucía Vargas'
 
 const EMPTY_FORM = {
   origen: '',
@@ -24,7 +29,7 @@ const EMPTY_FORM = {
   capacidad: '',
   volumen: '',
   operador: '',
-  checador: '',
+  checador: CHECADOR_ACTUAL,
   representanteTransportista: '',
   coordSalida: '',
   coordLlegada: '',
@@ -66,6 +71,12 @@ function FormPage() {
         )
         next.distancia = nuevaEsperada !== null ? String(nuevaEsperada) : ''
         next.justificacion = ''
+      }
+
+      if (field === 'operador') {
+        // Cada Operador tiene un Representante del Transportista asignado —
+        // se autocompleta, aunque el campo se puede seguir editando a mano.
+        next.representanteTransportista = representanteDeOperador(value)
       }
 
       return next
@@ -271,13 +282,11 @@ function FormPage() {
 
           <label>
             Nombre del checador
-            <input
-              type="text"
-              name="checador"
-              value={form.checador}
-              onChange={(e) => updateField('checador', e.target.value)}
-            />
+            <input type="text" name="checador" value={form.checador} readOnly />
           </label>
+          <p className="field-hint">
+            Ingresaste con tu usuario — este campo no se puede modificar.
+          </p>
 
           <label>
             Representante del Transportista (opcional)
@@ -315,23 +324,6 @@ function FormPage() {
             />
           </label>
         </div>
-
-        <AnimatePresence>
-          {costoEstimado !== null && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2, ease: EASE }}
-              className="cost-preview"
-            >
-              <span className="cost-preview-label">
-                Costo estimado de este viaje{aplicaPisoMinimo ? ' (mínimo 3 km aplicado)' : ''}
-              </span>
-              <span className="cost-preview-value">${costoEstimado.toLocaleString('es-MX')}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {error && <p className="field-error">{error}</p>}
 
