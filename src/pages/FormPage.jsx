@@ -11,7 +11,7 @@ import {
 } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
 import { PLACAS_AUTORIZADAS } from '../data/mockCamiones.js'
-import { representanteDeOperador } from '../data/mockOperadores.js'
+import { OPERADORES_AUTORIZADOS, representanteDeOperador } from '../data/mockOperadores.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -272,12 +272,18 @@ function FormPage() {
 
           <label>
             Nombre del operador
-            <input
-              type="text"
+            <select
               name="operador"
               value={form.operador}
               onChange={(e) => updateField('operador', e.target.value)}
-            />
+            >
+              <option value="">Selecciona un operador autorizado</option>
+              {OPERADORES_AUTORIZADOS.map((operador) => (
+                <option key={operador} value={operador}>
+                  {operador}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label>
