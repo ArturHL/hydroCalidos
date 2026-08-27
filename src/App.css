@@ -201,7 +201,11 @@
    Formularios y controles
    ============================================================ */
 
-.trip-form {
+/* .form-stack: mismo patrón que .trip-form (columna con espaciado
+   consistente) para cualquier grupo de tabla/formulario + botón de acción —
+   sin esto, elementos hermanos sueltos quedan pegados entre sí. */
+.trip-form,
+.form-stack {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -335,7 +339,10 @@ button {
 /* Solo dentro del formulario el botón no debe estirarse a todo el ancho —
    en cualquier otro contenedor (estados vacíos, tarjetas centradas) debe
    seguir el alineado de su padre, no forzar su propia posición. */
-.trip-form > .btn-primary {
+.trip-form > .btn-primary,
+.form-stack > .btn-primary,
+.form-stack > .btn-secondary,
+.form-stack > .btn-accept {
   align-self: flex-start;
 }
 

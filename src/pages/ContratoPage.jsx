@@ -107,7 +107,7 @@ function AcuerdoActual() {
       <>
         <h2 style={{ marginTop: 0 }}>Tarifas vigentes</h2>
         {editando ? (
-          <>
+          <div className="form-stack">
             <TarifasForm tarifas={tarifas} setTarifas={setTarifas} />
             <label>
               Motivo de la revisión
@@ -132,14 +132,13 @@ function AcuerdoActual() {
                 Cancelar
               </button>
             </div>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="form-stack">
             <TarifasTable tarifas={vigente} />
             <button
               type="button"
               className="btn-primary"
-              style={{ marginTop: 16 }}
               onClick={() => {
                 setTarifas(vigente)
                 setEditando(true)
@@ -148,7 +147,7 @@ function AcuerdoActual() {
               <IconEdit size={16} stroke={2} />
               Solicitar revisión
             </button>
-          </>
+          </div>
         )}
 
         <h2>Bancos de material y rutas</h2>
@@ -186,59 +185,61 @@ function AcuerdoActual() {
       </p>
 
       <h2 style={{ marginTop: 0 }}>Tarifas propuestas</h2>
-      {editando ? (
-        <TarifasForm tarifas={tarifas} setTarifas={setTarifas} />
-      ) : (
-        <TarifasTable tarifas={proposal.tarifas} />
-      )}
+      <div className="form-stack">
+        {editando ? (
+          <TarifasForm tarifas={tarifas} setTarifas={setTarifas} />
+        ) : (
+          <TarifasTable tarifas={proposal.tarifas} />
+        )}
 
-      {editando && (
-        <label>
-          Motivo de la contraoferta
-          <textarea rows={2} value={mensaje} onChange={(e) => setMensaje(e.target.value)} />
-        </label>
-      )}
+        {editando && (
+          <label>
+            Motivo de la contraoferta
+            <textarea rows={2} value={mensaje} onChange={(e) => setMensaje(e.target.value)} />
+          </label>
+        )}
 
-      {esMiTurno && !editando && (
-        <div className="ticket-actions">
+        {esMiTurno && !editando && (
+          <div className="ticket-actions">
+            <motion.button
+              type="button"
+              className="btn-accept"
+              whileTap={{ scale: 0.97 }}
+              onClick={() => aceptarPropuesta({ autor: role })}
+            >
+              <IconCheck size={16} stroke={2} />
+              Aceptar revisión
+            </motion.button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                setTarifas(proposal.tarifas)
+                setEditando(true)
+              }}
+            >
+              <IconRefresh size={16} stroke={2} />
+              Modificar y reenviar
+            </button>
+          </div>
+        )}
+
+        {esMiTurno && editando && (
           <motion.button
             type="button"
-            className="btn-accept"
+            className="btn-primary"
             whileTap={{ scale: 0.97 }}
-            onClick={() => aceptarPropuesta({ autor: role })}
-          >
-            <IconCheck size={16} stroke={2} />
-            Aceptar revisión
-          </motion.button>
-          <button
-            type="button"
-            className="btn-secondary"
             onClick={() => {
-              setTarifas(proposal.tarifas)
-              setEditando(true)
+              enviarPropuesta({ autor: role, tarifas, mensaje })
+              setEditando(false)
+              setMensaje('')
             }}
           >
-            <IconRefresh size={16} stroke={2} />
-            Modificar y reenviar
-          </button>
-        </div>
-      )}
-
-      {esMiTurno && editando && (
-        <motion.button
-          type="button"
-          className="btn-primary"
-          whileTap={{ scale: 0.97 }}
-          onClick={() => {
-            enviarPropuesta({ autor: role, tarifas, mensaje })
-            setEditando(false)
-            setMensaje('')
-          }}
-        >
-          <IconSend size={16} stroke={2} />
-          Enviar contraoferta
-        </motion.button>
-      )}
+            <IconSend size={16} stroke={2} />
+            Enviar contraoferta
+          </motion.button>
+        )}
+      </div>
 
       <h2>Historial de la negociación</h2>
       <RondasTrail rondas={proposal.rondas} />

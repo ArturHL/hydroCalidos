@@ -206,25 +206,27 @@ function EnProceso() {
             {nuevasExcepciones.length} excepción(es) nueva(s) quedarán para la próxima conciliación.
           </p>
         )}
-        <EdicionesForm
-          trips={tripsAbiertos}
-          ediciones={ediciones}
-          setEdiciones={setEdiciones}
-          mensaje={mensaje}
-          setMensaje={setMensaje}
-        />
-        <motion.button
-          type="button"
-          className="btn-primary"
-          whileTap={{ scale: 0.97 }}
-          onClick={() => {
-            enviarPropuesta({ autor: role, ediciones, mensaje })
-            setMensaje('')
-          }}
-        >
-          <IconSend size={16} stroke={2} />
-          Enviar solicitud de aprobación
-        </motion.button>
+        <div className="form-stack">
+          <EdicionesForm
+            trips={tripsAbiertos}
+            ediciones={ediciones}
+            setEdiciones={setEdiciones}
+            mensaje={mensaje}
+            setMensaje={setMensaje}
+          />
+          <motion.button
+            type="button"
+            className="btn-primary"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              enviarPropuesta({ autor: role, ediciones, mensaje })
+              setMensaje('')
+            }}
+          >
+            <IconSend size={16} stroke={2} />
+            Enviar solicitud de aprobación
+          </motion.button>
+        </div>
       </>
     )
   }
@@ -267,13 +269,30 @@ function EnProceso() {
       )}
 
       {contraofertando && (
-        <EdicionesForm
-          trips={tripsEnPropuesta}
-          ediciones={ediciones}
-          setEdiciones={setEdiciones}
-          mensaje={mensaje}
-          setMensaje={setMensaje}
-        />
+        <div className="form-stack">
+          <EdicionesForm
+            trips={tripsEnPropuesta}
+            ediciones={ediciones}
+            setEdiciones={setEdiciones}
+            mensaje={mensaje}
+            setMensaje={setMensaje}
+          />
+          {esMiTurno && (
+            <motion.button
+              type="button"
+              className="btn-primary"
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                enviarPropuesta({ autor: role, ediciones, mensaje })
+                setMensaje('')
+                setContraofertando(false)
+              }}
+            >
+              <IconSend size={16} stroke={2} />
+              Enviar contraoferta
+            </motion.button>
+          )}
+        </div>
       )}
 
       {esMiTurno && !contraofertando && (
@@ -308,22 +327,6 @@ function EnProceso() {
             Modificar y reenviar
           </button>
         </div>
-      )}
-
-      {esMiTurno && contraofertando && (
-        <motion.button
-          type="button"
-          className="btn-primary"
-          whileTap={{ scale: 0.97 }}
-          onClick={() => {
-            enviarPropuesta({ autor: role, ediciones, mensaje })
-            setMensaje('')
-            setContraofertando(false)
-          }}
-        >
-          <IconSend size={16} stroke={2} />
-          Enviar contraoferta
-        </motion.button>
       )}
 
       <h2>Historial de la negociación</h2>
