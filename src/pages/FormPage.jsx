@@ -10,6 +10,7 @@ import {
   materialesPorBanco,
 } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
+import { PLACAS_AUTORIZADAS } from '../data/mockCamiones.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -212,12 +213,18 @@ function FormPage() {
 
           <label>
             Placa
-            <input
-              type="text"
+            <select
               name="placa"
               value={form.placa}
               onChange={(e) => updateField('placa', e.target.value)}
-            />
+            >
+              <option value="">Selecciona un camión autorizado</option>
+              {PLACAS_AUTORIZADAS.map((placa) => (
+                <option key={placa} value={placa}>
+                  {placa}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label>
@@ -226,6 +233,7 @@ function FormPage() {
               type="number"
               name="capacidad"
               min="0"
+              step="0.1"
               value={form.capacidad}
               onChange={(e) => updateField('capacidad', e.target.value)}
             />

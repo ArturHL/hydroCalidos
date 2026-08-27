@@ -50,7 +50,7 @@ src/
 
 ## Qué ya funciona
 
-1. **Formulario** (`/formulario`, rol Checador): Origen (banco) → filtra Material disponible → Destino → Distancia (se autosugiere según la ruta; si el checador la cambia, exige una justificación de texto para poder enviar). Placa, capacidad, operador, checador y coordenadas de salida/llegada son texto libre (el checador ya los conoce de antemano). Al enviar, genera un ticket con folio autogenerado y navega a `/ticket/:id`.
+1. **Formulario** (`/formulario`, rol Checador): Origen (banco) → filtra Material disponible → Destino → Distancia (se autosugiere según la ruta; si el checador la cambia, exige una justificación de texto para poder enviar). Placa es un catálogo cerrado de camiones autorizados por la región (`src/data/mockCamiones.js`, `PLACAS_AUTORIZADAS`) — no texto libre, para que no se pueda capturar una placa no autorizada ni un error de dedo. Capacidad nominal acepta decimales (`step="0.1"`). Operador, checador y coordenadas de salida/llegada son texto libre (el checador ya los conoce de antemano). Al enviar, genera un ticket con folio autogenerado y navega a `/ticket/:id`.
 2. **Ticket generado** (`/ticket/:id`): resumen de datos + botón Imprimir (`window.print()`, básico, sin diseño de impresión elaborado) + volver a capturar otro viaje.
 3. **Registros** (`/registros`, rol Contador): tabla de todos los viajes capturados, con badge de "Excepción" cuando la distancia no coincidió con la esperada.
 4. **Conciliación** (`/conciliacion`, rol Contador): tab "En proceso" (revisar/editar excepciones de la semana, enviar propuesta, turno alterna entre las dos partes, aceptar aplica los cambios al viaje y limpia la excepción) y tab "Historial" (conciliaciones cerradas con el rastro completo de rondas).
