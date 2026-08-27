@@ -1,10 +1,12 @@
-# hydroCalidos
+# Volteo (maqueta de pitch)
 
 ## Qué es esto
 
 Maqueta/demo (no un MVP funcional) para el speech de venta de un **Sistema de Control Financiero y Logístico de Acarreo de Material** (grava, piedra, tepetate, arena, base, asfalto, barrera New Jersey, desperdicio) sobre carreteras. El objetivo es mostrar el flujo de trabajo completo a un comprador potencial, no procesar datos reales. Todo dato es mock/hardcodeado; no hay backend ni autenticación real.
 
-Repo: https://github.com/ArturHL/hydroCalidos (privado). Pensado para desplegarse en Vercel (`vercel.json` ya tiene el rewrite SPA).
+**Nombre visible vs. nombre del repo (2026-08-27):** la marca dentro de la app (pestaña del navegador, header, Excel exportado, localStorage) se cambió de "hydroCalidos" a **"Volteo"** — el nombre real del sistema (ver `../Volteo/CLAUDE.md`). El repo de GitHub, la carpeta local y el proyecto de Vercel **siguen llamándose `hydroCalidos` a propósito** — ya existe un proyecto hermano separado, `/home/arturohdz/Development/Volteo`, que es el sistema real (no la maqueta); renombrar este repo/carpeta/URL a ese mismo nombre generaría una colisión. Si se quiere unificar del todo (repo, carpeta, `hydrocalidos.vercel.app`), es una decisión aparte que hay que confirmar explícitamente antes de tocarla.
+
+Repo: https://github.com/ArturHL/hydroCalidos (privado). Pensado para desplegarse en Vercel (`vercel.json` ya tiene el rewrite SPA) — URL actual: `hydrocalidos.vercel.app`.
 
 ## Contexto de negocio (resumen)
 
@@ -30,10 +32,10 @@ Documento de levantamiento de requerimientos original: lo compartió el usuario 
 ```
 src/
   context/
-    RoleContext.jsx        rol activo (localStorage: hydrocalidos_role)
-    TripsContext.jsx       viajes/tickets capturados (hydrocalidos_trips)
-    ConciliacionContext.jsx  negociación semanal de excepciones (hydrocalidos_conciliacion)
-    ContratoContext.jsx    negociación de tarifas del contrato (hydrocalidos_contrato)
+    RoleContext.jsx        rol activo (localStorage: volteo_role)
+    TripsContext.jsx       viajes/tickets capturados (volteo_trips)
+    ConciliacionContext.jsx  negociación semanal de excepciones (volteo_conciliacion)
+    ContratoContext.jsx    negociación de tarifas del contrato (volteo_contrato)
   data/
     mockContract.js        bancos → materiales permitidos, distancias esperadas por ruta (banco-destino)
     mockTarifas.js         tarifas por clase de material (Piedra vs. resto)

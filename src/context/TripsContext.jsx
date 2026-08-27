@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 
 const TripsContext = createContext(null)
 
-const STORAGE_KEY = 'hydrocalidos_trips'
+const STORAGE_KEY = 'volteo_trips'
 
 function loadTrips() {
   try {

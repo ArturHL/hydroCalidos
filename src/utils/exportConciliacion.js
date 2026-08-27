@@ -96,7 +96,7 @@ export function exportarConciliacionXlsx(conciliacion, trips) {
   Object.entries(porBanco).forEach(([banco, tripsBanco], indice) => {
     const filas = [
       [`CONTROL DE SUMINISTRO — ${banco.toUpperCase()}`],
-      [`Conciliación cerrada el ${conciliacion.fechaCierre} — hydroCalidos (demo)`],
+      [`Conciliación cerrada el ${conciliacion.fechaCierre} — Volteo (demo)`],
       [],
       ENCABEZADOS,
       ...tripsBanco.map((trip, i) => filaDeViaje(trip, i)),

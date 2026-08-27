@@ -9,7 +9,7 @@ export const ROLES = [
 
 const RoleContext = createContext(null)
 
-const STORAGE_KEY = 'hydrocalidos_role'
+const STORAGE_KEY = 'volteo_role'
 
 export function RoleProvider({ children }) {
   const [role, setRole] = useState(

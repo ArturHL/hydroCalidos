@@ -87,7 +87,7 @@ function App() {
           <span className="brand-mark">
             <IconRoute size={17} stroke={2} />
           </span>
-          <span className="brand-word">hydroCalidos</span>
+          <span className="brand-word">Volteo</span>
         </span>
 
         <nav className="app-nav">

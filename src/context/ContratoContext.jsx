@@ -4,7 +4,7 @@ import { CLASES_TARIFARIAS } from '../data/mockTarifas.js'
 
 const ContratoContext = createContext(null)
 
-const STORAGE_KEY = 'hydrocalidos_contrato'
+const STORAGE_KEY = 'volteo_contrato'
 
 const EMPTY_STATE = { vigente: CLASES_TARIFARIAS, proposal: null, historial: [] }
 

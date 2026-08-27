@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 
 const ConciliacionContext = createContext(null)
 
-const STORAGE_KEY = 'hydrocalidos_conciliacion'
+const STORAGE_KEY = 'volteo_conciliacion'
 
 // `abierta`/`tripIdsAbiertos`: un Contador tiene que "abrir" la conciliación
 // semanal explícitamente — no se dispara solo con que existan excepciones.

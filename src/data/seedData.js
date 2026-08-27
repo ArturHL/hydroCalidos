@@ -10,10 +10,10 @@ import { calcularCostoViaje, CLASES_TARIFARIAS } from './mockTarifas.js'
 // en el pitch solo se capture UN viaje nuevo en el Formulario — todo lo
 // demás ya existe.
 
-const TRIPS_KEY = 'hydrocalidos_trips'
-const CONCILIACION_KEY = 'hydrocalidos_conciliacion'
-const CONTRATO_KEY = 'hydrocalidos_contrato'
-const ROLE_KEY = 'hydrocalidos_role'
+const TRIPS_KEY = 'volteo_trips'
+const CONCILIACION_KEY = 'volteo_conciliacion'
+const CONTRATO_KEY = 'volteo_contrato'
+const ROLE_KEY = 'volteo_role'
 
 function fechaEn(diasAtras, hora = 10) {
   const d = new Date()
