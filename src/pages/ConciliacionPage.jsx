@@ -5,6 +5,45 @@ import { useConciliacion } from '../context/ConciliacionContext.jsx'
 
 const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r.id, r.label]))
 
+// Mismas columnas de datos completos que RecordsPage (/registros) — el
+// socio pidió explícitamente que Conciliación no muestre una versión
+// reducida del viaje.
+const COLUMNAS_VIAJE = [
+  { key: 'fecha', label: 'Fecha' },
+  { key: 'origen', label: 'Origen' },
+  { key: 'material', label: 'Material' },
+  { key: 'destino', label: 'Destino' },
+  { key: 'volumen', label: 'Volumen (m³)', render: (t) => t.volumen ?? '—' },
+  {
+    key: 'costoEstimado',
+    label: 'Costo est.',
+    render: (t) => (t.costoEstimado != null ? `$${t.costoEstimado.toLocaleString('es-MX')}` : '—'),
+  },
+  { key: 'placa', label: 'Placa' },
+  { key: 'operador', label: 'Operador' },
+  { key: 'checador', label: 'Checador' },
+]
+
+function DatosViajeCells({ trip }) {
+  return (
+    <>
+      {COLUMNAS_VIAJE.map((col) => (
+        <td key={col.key}>{col.render ? col.render(trip) : trip[col.key]}</td>
+      ))}
+    </>
+  )
+}
+
+function DatosViajeHeaders() {
+  return (
+    <>
+      {COLUMNAS_VIAJE.map((col) => (
+        <th key={col.key}>{col.label}</th>
+      ))}
+    </>
+  )
+}
+
 function buildInicial(exceptionTrips, base = {}) {
   const next = { ...base }
   exceptionTrips.forEach((trip) => {
@@ -23,6 +62,7 @@ function EdicionesForm({ trips, ediciones, setEdiciones, mensaje, setMensaje }) 
           <thead>
             <tr>
               <th>Folio</th>
+              <DatosViajeHeaders />
               <th>Distancia esperada</th>
               <th>Distancia capturada</th>
               <th>Distancia propuesta</th>
@@ -35,6 +75,7 @@ function EdicionesForm({ trips, ediciones, setEdiciones, mensaje, setMensaje }) 
               return (
                 <tr key={trip.id}>
                   <td>{trip.folio}</td>
+                  <DatosViajeCells trip={trip} />
                   <td>{trip.distanciaEsperada} km</td>
                   <td>{trip.distancia} km</td>
                   <td>
@@ -152,6 +193,7 @@ function EnProceso() {
             <thead>
               <tr>
                 <th>Folio</th>
+                <DatosViajeHeaders />
                 <th>Distancia propuesta</th>
                 <th>Comentario</th>
               </tr>
@@ -160,6 +202,7 @@ function EnProceso() {
               {tripsEnPropuesta.map((trip) => (
                 <tr key={trip.id}>
                   <td>{trip.folio}</td>
+                  <DatosViajeCells trip={trip} />
                   <td>{proposal.ediciones[trip.id].distancia} km</td>
                   <td>{proposal.ediciones[trip.id].comentario || '—'}</td>
                 </tr>
