@@ -315,10 +315,16 @@ button {
 }
 
 .btn-primary {
-  align-self: flex-start;
   border-color: var(--accent);
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* Solo dentro del formulario el botón no debe estirarse a todo el ancho —
+   en cualquier otro contenedor (estados vacíos, tarjetas centradas) debe
+   seguir el alineado de su padre, no forzar su propia posición. */
+.trip-form > .btn-primary {
+  align-self: flex-start;
 }
 
 .btn-primary:hover {
@@ -817,7 +823,7 @@ tbody tr:hover td {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   padding: 56px 24px;
   color: var(--ink-300);
   text-align: center;
@@ -830,6 +836,12 @@ tbody tr:hover td {
   margin: 0;
   font-size: 13.5px;
   color: var(--ink-500);
+}
+
+.empty-state .btn-primary,
+.empty-state .btn-secondary,
+.empty-state .btn-accept {
+  margin-top: 4px;
 }
 
 /* ============================================================
