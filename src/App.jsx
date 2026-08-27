@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   IconArrowsExchange,
   IconChartBar,
+  IconEye,
   IconFileDollar,
   IconFileText,
   IconRoute,
@@ -16,6 +17,7 @@ import RecordsPage from './pages/RecordsPage'
 import ConciliacionPage from './pages/ConciliacionPage'
 import ContratoPage from './pages/ContratoPage'
 import MetricasPage from './pages/MetricasPage'
+import DuenoPage from './pages/DuenoPage'
 import './App.css'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -34,11 +36,17 @@ const NAV_BY_ROLE = {
     { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
     { to: '/metricas', label: 'Métricas', icon: IconChartBar },
   ],
+  dueno: [{ to: '/panel-dueno', label: 'Panel del Dueño', icon: IconEye }],
+}
+
+const RUTA_INICIAL_POR_ROL = {
+  checador: '/formulario',
+  dueno: '/panel-dueno',
 }
 
 function IndexRedirect() {
   const { role } = useRole()
-  return <Navigate to={role === 'checador' ? '/formulario' : '/registros'} replace />
+  return <Navigate to={RUTA_INICIAL_POR_ROL[role] ?? '/registros'} replace />
 }
 
 function AnimatedRoutes() {
@@ -61,6 +69,7 @@ function AnimatedRoutes() {
           <Route path="/conciliacion" element={<ConciliacionPage />} />
           <Route path="/contrato" element={<ContratoPage />} />
           <Route path="/metricas" element={<MetricasPage />} />
+          <Route path="/panel-dueno" element={<DuenoPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

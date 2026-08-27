@@ -21,7 +21,7 @@ Documento de levantamiento de requerimientos original: lo compartió el usuario 
 
 - Vite + React 19 (JavaScript, sin TypeScript), `react-router-dom` para las rutas.
 - Sin backend: todo el estado vive en React Context y se persiste en `localStorage` (así el demo sobrevive a un refresh).
-- Sin autenticación real: hay un **selector de rol** manual en el header (`Checador` / `Contador (Constructora)` / `Contador (Transportista)`) que decide qué navegación y acciones ve cada quien.
+- Sin autenticación real: hay un **selector de rol** manual en el header (`Checador` / `Contador (Constructora)` / `Contador (Transportista)` / `Dueño / Representante`) que decide qué navegación y acciones ve cada quien.
 - Simplificación deliberada para este MVP/demo: **una sola relación** Constructora ↔ Transportista (sin catálogo multi-empresa todavía).
 - **Sistema de diseño** (`src/index.css`/`src/App.css`, sin librería de componentes): tema claro único, sin dark mode — es una decisión de producto. Tipografía IBM Plex (Serif para títulos, Sans para UI, Mono para todo dato numérico/folio/costo). Acento tinta-azul de plano topográfico (`--accent`), no azul/morado genérico de SaaS. Profundidad vía sombras suaves por capas en superficies elevadas; bordes solo para separación estructural. Animación con `framer-motion` (transiciones de página, tabs con indicador deslizante, números animados en Métricas) e íconos con `@tabler/icons-react`. La firma del sistema es el `TurnoIndicator` (`src/components/`) — la negociación se visualiza como una ruta entre dos puntos, eco del propio dominio banco→destino. Detalle completo del proceso de diseño en la conversación que originó este cambio; si se retoma, usar la skill `interface-design` y ofrecer guardar `.interface-design/system.md`.
 
@@ -44,6 +44,7 @@ src/
     ConciliacionPage.jsx   Conciliación semanal (Contador)
     ContratoPage.jsx       Contrato actual + revisión (Contador)
     MetricasPage.jsx       Placeholder, pendiente de construir
+    DuenoPage.jsx          Panel del Dueño/Representante — solo lectura
   App.jsx                  Header, selector de rol, navegación condicional por rol, rutas
 ```
 
@@ -55,6 +56,7 @@ src/
 4. **Conciliación** (`/conciliacion`, rol Contador): tab "En proceso" (revisar/editar excepciones de la semana, enviar propuesta, turno alterna entre las dos partes, aceptar aplica los cambios al viaje y limpia la excepción) y tab "Historial" (conciliaciones cerradas con el rastro completo de rondas).
 5. **Contrato actual** (`/contrato`, rol Contador): mismo patrón de negociación que Conciliación pero sobre las tarifas (5 bandas de distancia × 3 categorías de material — ver más abajo). Tab "Acuerdo actual" (tabla vigente + Solicitar revisión) y tab "Historial". También lista el catálogo de bancos/materiales como referencia de solo lectura.
 6. **Métricas** (`/metricas`, rol Contador): KPIs de la semana actual vs. la anterior (viajes, km, volumen transportado, costo), desglose de costo por categoría de material, todo calculado con `calcularCostoViaje`. Sin combustible/diésel, como se pidió.
+7. **Panel del Dueño** (`/panel-dueno`, rol Dueño/Representante): KPIs de solo lectura (viajes totales, costo acumulado, excepciones abiertas, conciliaciones cerradas) + historial de conciliaciones. Cero botones de edición/negociación — el rol confirmado por el socio ("Duenos y representantes... sin acceso a modificar datos, solo verlos", `docs/business/CUESTIONARIO_SOCIO.md` §0 en Volteo). Verificado con Puppeteer headless que no aparece ningún botón de guardar/enviar/proponer/aceptar/descargar en esta pantalla.
 
 Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada.
 
@@ -75,13 +77,27 @@ Esto también motivó dos cambios más en el modelo de datos del demo:
 
 Pendiente aún: si la vista de Métricas debe diferenciarse por rol de Contador (Constructora vs. Transportista) — sigue sin importar mucho con una sola relación simplificada, pero conviene confirmarlo si se agrega multi-organización al demo en el futuro.
 
+## Mejoras derivadas del cuestionario de negocio (2026-08-27)
+
+Con las respuestas ya cerradas del cuestionario de negocio de Volteo (`docs/business/CUESTIONARIO_SOCIO.md`), se priorizaron 3 mejoras concretas para el pitch:
+
+1. **Bancos/materiales/cadenamientos reales** de la empresa prospecto (ver commit "Use real bank/material/chainage data for the pitch demo") — `mockContract.js`/`mockTarifas.js`/`seedData.js` ya no usan nombres inventados.
+2. **Piso de facturación a 3 km** (`mockTarifas.js`, `distanciaFacturable()`) — ningún viaje se cobra a menos de 3 km, ni siquiera "Movimiento Interno" (viajes dentro del mismo sitio). Se agregó el viaje de ejemplo `TCK-0012` (Banco Las Rampas → 52+500, 1 km real) para demostrarlo en vivo; Formulario, Ticket y Registros anotan "mín. 3 km" cuando aplica.
+3. **Filtros/orden en Registros** (`RecordsPage.jsx`) — buscar por folio/placa, filtrar por mes, ordenar por excepciones/fecha/distancia/placa, toggle "Solo excepciones". Responde directamente a lo que el prospecto pidió en la conversación (`conversacionExtra.txt` en Volteo).
+4. **Panel del Dueño** (`DuenoPage.jsx`, rol nuevo) — ver "Qué ya funciona" arriba.
+
+Verificado con Puppeteer headless (instalado con `--no-save`, desinstalado al terminar): carga de semilla (12 viajes), KPIs del Panel del Dueño, ausencia de botones de edición en esa pantalla, filtros/orden de Registros, y el cálculo exacto del piso de 3 km (`TCK-0012`: 1 km real × piso 3 km × tarifa Material × 9.5 m³ = $237.50, verificado contra lo que renderiza la UI).
+
+No se construyeron (evaluadas y descartadas para esta ronda, ver conversación que lo decidió): Operador como 4º rol completo, modalidad Renta, ajuste puntual-vs-temporal en conciliación, firma electrónica, migración histórica, comparativa multi-obra en Métricas — desproporcionadas para lo que suman a este pitch específico.
+
 ## Datos de ejemplo para pitch (SeedMenu)
 
 Botón discreto arriba a la derecha del header (ícono de base de datos, junto
 al selector de rol) — `src/components/SeedMenu.jsx` / `src/data/seedData.js`.
-"Cargar datos de ejemplo" puebla los 4 stores de localStorage con 11 viajes
+"Cargar datos de ejemplo" puebla los 4 stores de localStorage con 12 viajes
 que cubren todos los escenarios ya construidos sin tener que capturarlos a
-mano antes de una demo: los 5 bancos, las 3 categorías de tarifa, dos
+mano antes de una demo: los 5 bancos, las 3 categorías de tarifa, un viaje de
+Movimiento Interno que demuestra el piso de facturación a 3 km, dos
 semanas distintas (para que Métricas tenga una comparativa real en vez de
 "sin referencia"), una excepción ya resuelta con su conciliación cerrada
 (exportable a Excel), una excepción pendiente lista para "Iniciar

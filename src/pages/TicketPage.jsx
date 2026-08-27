@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { IconAlertTriangle, IconPlus, IconPrinter } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
+import { distanciaFacturable } from '../data/mockTarifas.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -30,6 +31,9 @@ function TicketPage() {
   if (!trip) {
     return <Navigate to="/formulario" replace />
   }
+
+  const facturable = distanciaFacturable(trip.distancia)
+  const aplicaPisoMinimo = facturable !== null && facturable > Number(trip.distancia)
 
   return (
     <motion.section
@@ -63,7 +67,9 @@ function TicketPage() {
 
       {trip.costoEstimado != null && (
         <div className="ticket-cost">
-          <span className="ticket-cost-label">Costo estimado del viaje</span>
+          <span className="ticket-cost-label">
+            Costo estimado del viaje{aplicaPisoMinimo ? ` (mínimo ${facturable} km aplicado)` : ''}
+          </span>
           <span className="ticket-cost-value">${trip.costoEstimado.toLocaleString('es-MX')}</span>
         </div>
       )}

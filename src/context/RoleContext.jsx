@@ -4,6 +4,7 @@ export const ROLES = [
   { id: 'checador', label: 'Checador' },
   { id: 'contador_constructora', label: 'Contador (Constructora)' },
   { id: 'contador_transportista', label: 'Contador (Transportista)' },
+  { id: 'dueno', label: 'Dueño / Representante' },
 ]
 
 const RoleContext = createContext(null)

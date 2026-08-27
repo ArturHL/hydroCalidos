@@ -104,6 +104,48 @@
   min-height: auto;
 }
 
+.records-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.records-toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-300);
+}
+
+.records-toolbar input,
+.records-toolbar select {
+  font: 13px/1 var(--font-sans);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  padding: 8px 12px;
+  min-height: auto;
+}
+
+.records-toolbar .checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 9px;
+}
+
+.records-toolbar .checkbox-field input {
+  padding: 0;
+  width: 15px;
+  height: 15px;
+}
+
 .seed-menu {
   position: relative;
 }

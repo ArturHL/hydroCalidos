@@ -27,6 +27,18 @@ export function claseTarifaria(material) {
   return 'Material'
 }
 
+// Piso de facturación: ningún viaje se cobra a menos de 3 km, sin importar
+// qué tan corto sea el recorrido real — incluye "Movimiento Interno" (viajes
+// dentro del mismo proyecto/sitio). Regla confirmada con el cliente real
+// (ver docs/business/CUESTIONARIO_SOCIO.md §9-§10 en el proyecto Volteo).
+export const DISTANCIA_MINIMA_FACTURABLE = 3
+
+export function distanciaFacturable(distanciaKm) {
+  const distancia = Number(distanciaKm)
+  if (!Number.isFinite(distancia) || distancia <= 0) return null
+  return Math.max(distancia, DISTANCIA_MINIMA_FACTURABLE)
+}
+
 // Costo = volumen (m³) × precio acumulado por km, sumando cada banda de
 // distancia que el viaje atraviesa. Fórmula validada aritméticamente contra
 // un Excel de conciliación real (ver HALLAZGOS_MUESTRAS.md) — el precio es
@@ -36,9 +48,9 @@ export function claseTarifaria(material) {
 // no una por cada banda de la tarifa — calcularCostoDesglosado() reproduce
 // esa misma simplificación para la exportación a Excel.
 export function calcularCostoDesglosado({ material, distanciaKm, volumenM3 }, tarifas = CLASES_TARIFARIAS) {
-  const distancia = Number(distanciaKm)
+  const distancia = distanciaFacturable(distanciaKm)
   const volumen = Number(volumenM3)
-  if (!Number.isFinite(distancia) || distancia <= 0 || !Number.isFinite(volumen) || volumen <= 0) {
+  if (distancia === null || !Number.isFinite(volumen) || volumen <= 0) {
     return null
   }
 

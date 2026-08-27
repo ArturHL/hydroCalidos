@@ -213,7 +213,23 @@ export function cargarDatosDeEjemplo() {
     representanteTransportista: 'Raúl Ponce',
   })
 
-  const trips = [v11, v8, v7, v6, v5, v10, v9, v4, v3, v2, v1]
+  // ---- Movimiento Interno — viaje real dentro del mismo sitio (<1 km),
+  // para demostrar el piso de facturación a 3 km en Registros/Métricas.
+  const v12 = crearViaje({
+    folio: 12,
+    fechaObj: fechaEn(2),
+    origen: 'Banco Las Rampas',
+    material: 'Desperdicio',
+    destino: '52+500',
+    distanciaCapturada: 1,
+    volumen: 9.5,
+    placa: 'GXA-201',
+    operador: 'Martín Reyes',
+    checador: 'Lucía Vargas',
+    representanteTransportista: 'Raúl Ponce',
+  })
+
+  const trips = [v11, v12, v8, v7, v6, v5, v10, v9, v4, v3, v2, v1]
   localStorage.setItem(TRIPS_KEY, JSON.stringify(trips))
 
   // ---- Conciliación ya cerrada (v9 y v10), con dos rondas de negociación

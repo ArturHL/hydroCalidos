@@ -9,7 +9,7 @@ import {
   distanciaEsperada,
   materialesPorBanco,
 } from '../data/mockContract.js'
-import { calcularCostoViaje } from '../data/mockTarifas.js'
+import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -46,6 +46,8 @@ function FormPage() {
     distanciaKm: form.distancia,
     volumenM3: form.volumen,
   })
+  const facturable = form.distancia !== '' ? distanciaFacturable(form.distancia) : null
+  const aplicaPisoMinimo = facturable !== null && Number(form.distancia) < facturable
 
   function updateField(field, value) {
     setError('')
@@ -177,6 +179,11 @@ function FormPage() {
           </label>
           {esperada !== null && (
             <p className="field-hint">Distancia esperada para esta ruta: {esperada} km</p>
+          )}
+          {aplicaPisoMinimo && (
+            <p className="field-hint">
+              Viaje corto (Movimiento Interno): se factura al mínimo de {facturable} km.
+            </p>
           )}
 
           <AnimatePresence initial={false}>
@@ -310,7 +317,9 @@ function FormPage() {
               transition={{ duration: 0.2, ease: EASE }}
               className="cost-preview"
             >
-              <span className="cost-preview-label">Costo estimado de este viaje</span>
+              <span className="cost-preview-label">
+                Costo estimado de este viaje{aplicaPisoMinimo ? ' (mínimo 3 km aplicado)' : ''}
+              </span>
               <span className="cost-preview-value">${costoEstimado.toLocaleString('es-MX')}</span>
             </motion.div>
           )}
