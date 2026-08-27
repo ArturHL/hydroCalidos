@@ -31,7 +31,11 @@ export function claseTarifaria(material) {
 // distancia que el viaje atraviesa. Fórmula validada aritméticamente contra
 // un Excel de conciliación real (ver HALLAZGOS_MUESTRAS.md) — el precio es
 // por km POR m³ transportado, no un monto fijo por viaje.
-export function calcularCostoViaje({ material, distanciaKm, volumenM3 }, tarifas = CLASES_TARIFARIAS) {
+//
+// El ledger real solo distingue dos columnas de costo ("1ER KM" y "KM SUB"),
+// no una por cada banda de la tarifa — calcularCostoDesglosado() reproduce
+// esa misma simplificación para la exportación a Excel.
+export function calcularCostoDesglosado({ material, distanciaKm, volumenM3 }, tarifas = CLASES_TARIFARIAS) {
   const distancia = Number(distanciaKm)
   const volumen = Number(volumenM3)
   if (!Number.isFinite(distancia) || distancia <= 0 || !Number.isFinite(volumen) || volumen <= 0) {
@@ -43,16 +47,33 @@ export function calcularCostoViaje({ material, distanciaKm, volumenM3 }, tarifas
 
   let restante = distancia
   let kmAcumulado = 0
-  let precioPorM3 = 0
+  let costoPrimerKm = 0
+  let costoKmSubsecuentes = 0
 
   for (const banda of BANDAS_DISTANCIA) {
     if (restante <= 0) break
     const kmDisponiblesEnBanda = banda.hasta - kmAcumulado
     const kmEnBanda = Math.min(restante, kmDisponiblesEnBanda)
-    precioPorM3 += kmEnBanda * tarifa[banda.key]
+    const costoBanda = kmEnBanda * tarifa[banda.key] * volumen
+
+    if (banda.key === 'primerKm') {
+      costoPrimerKm += costoBanda
+    } else {
+      costoKmSubsecuentes += costoBanda
+    }
+
     restante -= kmEnBanda
     kmAcumulado = banda.hasta
   }
 
-  return Math.round(precioPorM3 * volumen * 100) / 100
+  const redondear = (v) => Math.round(v * 100) / 100
+  return {
+    primerKm: redondear(costoPrimerKm),
+    kmSubsecuentes: redondear(costoKmSubsecuentes),
+    total: redondear(costoPrimerKm + costoKmSubsecuentes),
+  }
+}
+
+export function calcularCostoViaje(viaje, tarifas = CLASES_TARIFARIAS) {
+  return calcularCostoDesglosado(viaje, tarifas)?.total ?? null
 }

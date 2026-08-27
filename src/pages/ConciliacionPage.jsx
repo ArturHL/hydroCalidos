@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ROLES, useRole } from '../context/RoleContext.jsx'
 import { useTrips } from '../context/TripsContext.jsx'
 import { useConciliacion } from '../context/ConciliacionContext.jsx'
+import { exportarConciliacionXlsx } from '../utils/exportConciliacion.js'
 
 const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r.id, r.label]))
 
@@ -275,6 +276,7 @@ function EnProceso() {
 
 function Historial() {
   const { historial } = useConciliacion()
+  const { trips } = useTrips()
 
   if (historial.length === 0) {
     return <p>Aún no hay conciliaciones cerradas.</p>
@@ -287,6 +289,15 @@ function Historial() {
           <strong>Conciliación cerrada</strong> — {c.fechaCierre} (aceptada por {ROLE_LABEL[c.cerradoPor]})
           <p>{Object.keys(c.ediciones).length} viaje(s) ajustado(s)</p>
           <RondasTrail rondas={c.rondas} />
+          <div className="ticket-actions">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => exportarConciliacionXlsx(c, trips)}
+            >
+              Descargar Excel
+            </button>
+          </div>
         </li>
       ))}
     </ul>
