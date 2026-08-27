@@ -1,52 +1,63 @@
+// Bancos y cadenamientos reales de un tramo carretero en San Luis Potosí
+// (km 50-66), tomados del documento firmado "Distancias Acarreos
+// (Conciliación)" — ver docs/business/muestras en el proyecto Volteo. Nombres
+// de personas/firmas del documento original omitidos a propósito.
 export const BANCOS = [
   {
-    nombre: 'Banco El Águila',
-    materiales: ['Piedra', 'Grava ¾', 'Grava 1', 'Grava 2'],
+    nombre: 'Banco Las Rampas',
+    materiales: ['Terraplén', 'Desperdicio'],
   },
   {
-    nombre: 'Banco La Cantera',
-    materiales: ['Tepetate', 'Arena', 'Base'],
+    nombre: 'Banco Las Torres',
+    materiales: ['Terraplén'],
   },
   {
-    nombre: 'Planta Asfáltica Sur',
-    materiales: ['Asfalto'],
+    nombre: 'Banco Las Bombas',
+    materiales: ['Tepetate', 'Desperdicio'],
   },
   {
-    nombre: 'Patio de Prefabricados',
-    materiales: ['Barrera tipo New Jersey'],
+    nombre: 'Banco De Piedra',
+    materiales: ['Piedra'],
   },
   {
-    nombre: 'Sitio de Tiro Norte',
-    materiales: ['Desperdicio'],
+    nombre: 'Banco Clemente',
+    materiales: ['Tepetate', 'Desperdicio'],
   },
 ]
 
 // Formato de cadenamiento (km+m), como se captura en tickets reales del sector
 // (ver docs/business/HALLAZGOS_MUESTRAS.md en el proyecto Volteo) — no un nombre
-// de lugar libre.
-export const DESTINOS = ['12+000', '18+300', '25+750', '9+400']
+// de lugar libre. Destinos y distancias tomados del mismo documento real de
+// distancias de acarreo (un "tiro" confirmado por banco, verificado
+// aritméticamente: diferencia de cadenamiento + desviación de entrada).
+export const DESTINOS = ['54+700', '53+100', '59+760', '57+920', '61+010']
 
 const DISTANCIAS_ESPERADAS = {
-  'Banco El Águila|12+000': 12,
-  'Banco El Águila|18+300': 18,
-  'Banco El Águila|25+750': 25,
-  'Banco El Águila|9+400': 9,
-  'Banco La Cantera|12+000': 15,
-  'Banco La Cantera|18+300': 22,
-  'Banco La Cantera|25+750': 30,
-  'Banco La Cantera|9+400': 14,
-  'Planta Asfáltica Sur|12+000': 8,
-  'Planta Asfáltica Sur|18+300': 16,
-  'Planta Asfáltica Sur|25+750': 20,
-  'Planta Asfáltica Sur|9+400': 11,
-  'Patio de Prefabricados|12+000': 10,
-  'Patio de Prefabricados|18+300': 19,
-  'Patio de Prefabricados|25+750': 27,
-  'Patio de Prefabricados|9+400': 13,
-  'Sitio de Tiro Norte|12+000': 6,
-  'Sitio de Tiro Norte|18+300': 14,
-  'Sitio de Tiro Norte|25+750': 21,
-  'Sitio de Tiro Norte|9+400': 7,
+  'Banco Las Rampas|54+700': 3,
+  'Banco Las Rampas|53+100': 6,
+  'Banco Las Rampas|59+760': 8,
+  'Banco Las Rampas|57+920': 6,
+  'Banco Las Rampas|61+010': 9,
+  'Banco Las Torres|54+700': 4,
+  'Banco Las Torres|53+100': 3,
+  'Banco Las Torres|59+760': 5,
+  'Banco Las Torres|57+920': 4,
+  'Banco Las Torres|61+010': 6,
+  'Banco Las Bombas|54+700': 9,
+  'Banco Las Bombas|53+100': 8,
+  'Banco Las Bombas|59+760': 3,
+  'Banco Las Bombas|57+920': 4,
+  'Banco Las Bombas|61+010': 4,
+  'Banco De Piedra|54+700': 5,
+  'Banco De Piedra|53+100': 7,
+  'Banco De Piedra|59+760': 6,
+  'Banco De Piedra|57+920': 4,
+  'Banco De Piedra|61+010': 7,
+  'Banco Clemente|54+700': 8,
+  'Banco Clemente|53+100': 10,
+  'Banco Clemente|59+760': 4,
+  'Banco Clemente|57+920': 6,
+  'Banco Clemente|61+010': 3,
 }
 
 export function materialesPorBanco(banco) {

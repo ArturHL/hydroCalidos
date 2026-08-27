@@ -18,8 +18,8 @@ export const CLASES_TARIFARIAS = {
   Roca: { primerKm: 12, km2a20: 8.5, km21a40: 6, km41a70: 5, km71mas: 5 },
 }
 
-const MATERIALES_ROCA = ['Piedra', 'Grava ¾', 'Grava 1', 'Grava 2']
-const MATERIALES_ASFALTO = ['Asfalto']
+const MATERIALES_ROCA = ['Piedra']
+const MATERIALES_ASFALTO = []
 
 export function claseTarifaria(material) {
   if (MATERIALES_ROCA.includes(material)) return 'Roca'
