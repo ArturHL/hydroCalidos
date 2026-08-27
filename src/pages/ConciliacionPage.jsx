@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
+  IconAlertTriangle,
   IconCheck,
   IconClipboardCheck,
   IconDownload,
@@ -35,6 +36,27 @@ const COLUMNAS_VIAJE = [
   { key: 'placa', label: 'Placa' },
   { key: 'operador', label: 'Operador' },
   { key: 'checador', label: 'Checador' },
+  {
+    key: 'excepcion',
+    label: 'Excepción',
+    render: (t) =>
+      t.excepcion ? (
+        <span className="badge badge-warning">
+          <IconAlertTriangle size={12} stroke={2} />
+          Distancia
+        </span>
+      ) : (
+        '—'
+      ),
+  },
+  {
+    // El Checador escribe esta justificación en el Formulario al capturar el
+    // viaje, cuando cambia la distancia sugerida — tiene que llegar íntegra
+    // y visible hasta acá, no solo como tooltip (ver Registros).
+    key: 'justificacion',
+    label: 'Justificación del Checador',
+    render: (t) => t.justificacion || '—',
+  },
 ]
 
 function DatosViajeCells({ trip }) {
@@ -144,15 +166,23 @@ function RondasTrail({ rondas }) {
   )
 }
 
+const SIETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000
+
 function EnProceso() {
   const { role } = useRole()
   const { trips, updateTrip } = useTrips()
   const { abierta, tripIdsAbiertos, proposal, iniciarConciliacion, enviarPropuesta, aceptarPropuesta } =
     useConciliacion()
 
-  const exceptionTrips = trips.filter((t) => t.excepcion)
+  // Filtro de últimos 7 días: la conciliación semanal es un proceso
+  // obligatorio — incluye TODOS los viajes del periodo, tengan o no
+  // excepción, no solo los que traen algo raro.
+  const haceSieteDias = Date.now() - SIETE_DIAS_MS
+  const tripsUltimos7Dias = trips.filter((t) => t.timestamp && t.timestamp >= haceSieteDias)
+  const excepcionesUltimos7Dias = tripsUltimos7Dias.filter((t) => t.excepcion)
+
   const tripsAbiertos = trips.filter((t) => tripIdsAbiertos.includes(t.id))
-  const nuevasExcepciones = abierta ? exceptionTrips.filter((t) => !tripIdsAbiertos.includes(t.id)) : []
+  const nuevosTrips = abierta ? trips.filter((t) => !tripIdsAbiertos.includes(t.id)) : []
 
   const [ediciones, setEdiciones] = useState(() => buildInicial(tripsAbiertos))
   const [mensaje, setMensaje] = useState('')
@@ -164,29 +194,30 @@ function EnProceso() {
   }, [trips, abierta])
 
   // Paso 1: nadie ha "abierto" la conciliación todavía — es un paso
-  // deliberado, no algo que se dispare solo por existir excepciones.
+  // deliberado, no algo que se dispare solo por existir excepciones. El
+  // botón siempre está disponible: la conciliación semanal es obligatoria
+  // haya o no haya excepciones esta semana.
   if (!abierta) {
-    if (exceptionTrips.length === 0) {
-      return (
-        <div className="empty-state">
-          <IconInbox size={26} stroke={1.5} />
-          <p>No hay excepciones pendientes esta semana.</p>
-        </div>
-      )
-    }
-
     return (
       <div className="empty-state">
         <IconClipboardCheck size={26} stroke={1.5} />
         <p>
-          Hay {exceptionTrips.length} viaje{exceptionTrips.length === 1 ? '' : 's'} con excepción
-          esperando revisión.
+          {tripsUltimos7Dias.length} viaje{tripsUltimos7Dias.length === 1 ? '' : 's'} de los
+          últimos 7 días
+          {excepcionesUltimos7Dias.length > 0
+            ? ` (${excepcionesUltimos7Dias.length} con excepción)`
+            : ' (ninguno con excepción)'}
+          .
+        </p>
+        <p className="field-hint">
+          La conciliación semanal es obligatoria — inclúyela aunque no haya excepciones
+          pendientes.
         </p>
         <motion.button
           type="button"
           className="btn-primary"
           whileTap={{ scale: 0.97 }}
-          onClick={() => iniciarConciliacion(exceptionTrips.map((t) => t.id))}
+          onClick={() => iniciarConciliacion(tripsUltimos7Dias.map((t) => t.id))}
         >
           <IconClipboardCheck size={16} stroke={2} />
           Iniciar conciliación semanal
@@ -199,11 +230,13 @@ function EnProceso() {
     return (
       <>
         <p className="field-hint">
-          Revisa las excepciones de la semana y envía tu propuesta a la otra parte.
+          Revisa todos los viajes de la semana (con o sin excepción) y envía tu propuesta a la
+          otra parte.
         </p>
-        {nuevasExcepciones.length > 0 && (
+        {nuevosTrips.length > 0 && (
           <p className="field-hint">
-            {nuevasExcepciones.length} excepción(es) nueva(s) quedarán para la próxima conciliación.
+            {nuevosTrips.length} viaje{nuevosTrips.length === 1 ? '' : 's'} nuevo
+            {nuevosTrips.length === 1 ? '' : 's'} quedarán para la próxima conciliación.
           </p>
         )}
         <div className="form-stack">
@@ -366,7 +399,8 @@ function Historial() {
             </span>
           </div>
           <p className="field-hint" style={{ margin: '0 0 8px' }}>
-            Aceptada por {ROLE_LABEL[c.cerradoPor]} · {Object.keys(c.ediciones).length} viaje(s) ajustado(s)
+            Aceptada por {ROLE_LABEL[c.cerradoPor]} · {Object.keys(c.ediciones).length} viaje(s)
+            incluido(s) en la conciliación
           </p>
           <RondasTrail rondas={c.rondas} />
           <div className="ticket-actions">
