@@ -1,4 +1,8 @@
+import { motion } from 'framer-motion'
+import { IconInbox, IconAlertTriangle } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
+
+const EASE = [0.16, 1, 0.3, 1]
 
 function RecordsPage() {
   const { trips } = useTrips()
@@ -7,7 +11,10 @@ function RecordsPage() {
     return (
       <section>
         <h1>Registros</h1>
-        <p>Aún no hay registros.</p>
+        <div className="empty-state">
+          <IconInbox size={26} stroke={1.5} />
+          <p>Aún no hay registros.</p>
+        </div>
       </section>
     )
   }
@@ -34,8 +41,13 @@ function RecordsPage() {
             </tr>
           </thead>
           <tbody>
-            {trips.map((trip) => (
-              <tr key={trip.id}>
+            {trips.map((trip, i) => (
+              <motion.tr
+                key={trip.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: EASE, delay: Math.min(i, 8) * 0.02 }}
+              >
                 <td>{trip.folio}</td>
                 <td>{trip.fecha}</td>
                 <td>{trip.origen}</td>
@@ -49,14 +61,15 @@ function RecordsPage() {
                 <td>{trip.checador}</td>
                 <td>
                   {trip.excepcion ? (
-                    <span className="badge-exception" title={trip.justificacion}>
+                    <span className="badge badge-warning" title={trip.justificacion}>
+                      <IconAlertTriangle size={12} stroke={2} />
                       Distancia
                     </span>
                   ) : (
                     '—'
                   )}
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>

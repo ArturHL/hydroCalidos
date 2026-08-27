@@ -1,4 +1,13 @@
-import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
+import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  IconArrowsExchange,
+  IconChartBar,
+  IconFileDollar,
+  IconFileText,
+  IconRoute,
+  IconTable,
+} from '@tabler/icons-react'
 import { ROLES, useRole } from './context/RoleContext.jsx'
 import FormPage from './pages/FormPage'
 import TicketPage from './pages/TicketPage'
@@ -8,26 +17,52 @@ import ContratoPage from './pages/ContratoPage'
 import MetricasPage from './pages/MetricasPage'
 import './App.css'
 
+const EASE = [0.16, 1, 0.3, 1]
+
 const NAV_BY_ROLE = {
-  checador: [{ to: '/formulario', label: 'Formulario' }],
+  checador: [{ to: '/formulario', label: 'Formulario', icon: IconFileText }],
   contador_constructora: [
-    { to: '/registros', label: 'Registros' },
-    { to: '/conciliacion', label: 'Conciliación' },
-    { to: '/contrato', label: 'Contrato actual' },
-    { to: '/metricas', label: 'Métricas' },
+    { to: '/registros', label: 'Registros', icon: IconTable },
+    { to: '/conciliacion', label: 'Conciliación', icon: IconArrowsExchange },
+    { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
+    { to: '/metricas', label: 'Métricas', icon: IconChartBar },
   ],
   contador_transportista: [
-    { to: '/registros', label: 'Registros' },
-    { to: '/conciliacion', label: 'Conciliación' },
-    { to: '/contrato', label: 'Contrato actual' },
-    { to: '/metricas', label: 'Métricas' },
+    { to: '/registros', label: 'Registros', icon: IconTable },
+    { to: '/conciliacion', label: 'Conciliación', icon: IconArrowsExchange },
+    { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
+    { to: '/metricas', label: 'Métricas', icon: IconChartBar },
   ],
 }
 
 function IndexRedirect() {
   const { role } = useRole()
+  return <Navigate to={role === 'checador' ? '/formulario' : '/registros'} replace />
+}
+
+function AnimatedRoutes() {
+  const location = useLocation()
+
   return (
-    <Navigate to={role === 'checador' ? '/formulario' : '/registros'} replace />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.22, ease: EASE }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<IndexRedirect />} />
+          <Route path="/formulario" element={<FormPage />} />
+          <Route path="/ticket/:id" element={<TicketPage />} />
+          <Route path="/registros" element={<RecordsPage />} />
+          <Route path="/conciliacion" element={<ConciliacionPage />} />
+          <Route path="/contrato" element={<ContratoPage />} />
+          <Route path="/metricas" element={<MetricasPage />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
@@ -38,12 +73,18 @@ function App() {
   return (
     <>
       <header className="app-header no-print">
-        <span className="brand">hydroCalidos</span>
+        <span className="brand">
+          <span className="brand-mark">
+            <IconRoute size={17} stroke={2} />
+          </span>
+          <span className="brand-word">hydroCalidos</span>
+        </span>
 
         <nav className="app-nav">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to}>
-              {link.label}
+              <link.icon size={16} stroke={2} />
+              <span>{link.label}</span>
             </NavLink>
           ))}
         </nav>
@@ -61,15 +102,7 @@ function App() {
       </header>
 
       <main className="app-main">
-        <Routes>
-          <Route path="/" element={<IndexRedirect />} />
-          <Route path="/formulario" element={<FormPage />} />
-          <Route path="/ticket/:id" element={<TicketPage />} />
-          <Route path="/registros" element={<RecordsPage />} />
-          <Route path="/conciliacion" element={<ConciliacionPage />} />
-          <Route path="/contrato" element={<ContratoPage />} />
-          <Route path="/metricas" element={<MetricasPage />} />
-        </Routes>
+        <AnimatedRoutes />
       </main>
     </>
   )

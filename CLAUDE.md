@@ -23,6 +23,7 @@ Documento de levantamiento de requerimientos original: lo compartió el usuario 
 - Sin backend: todo el estado vive en React Context y se persiste en `localStorage` (así el demo sobrevive a un refresh).
 - Sin autenticación real: hay un **selector de rol** manual en el header (`Checador` / `Contador (Constructora)` / `Contador (Transportista)`) que decide qué navegación y acciones ve cada quien.
 - Simplificación deliberada para este MVP/demo: **una sola relación** Constructora ↔ Transportista (sin catálogo multi-empresa todavía).
+- **Sistema de diseño** (`src/index.css`/`src/App.css`, sin librería de componentes): tema claro único, sin dark mode — es una decisión de producto. Tipografía IBM Plex (Serif para títulos, Sans para UI, Mono para todo dato numérico/folio/costo). Acento tinta-azul de plano topográfico (`--accent`), no azul/morado genérico de SaaS. Profundidad vía sombras suaves por capas en superficies elevadas; bordes solo para separación estructural. Animación con `framer-motion` (transiciones de página, tabs con indicador deslizante, números animados en Métricas) e íconos con `@tabler/icons-react`. La firma del sistema es el `TurnoIndicator` (`src/components/`) — la negociación se visualiza como una ruta entre dos puntos, eco del propio dominio banco→destino. Detalle completo del proceso de diseño en la conversación que originó este cambio; si se retoma, usar la skill `interface-design` y ofrecer guardar `.interface-design/system.md`.
 
 ## Estructura
 

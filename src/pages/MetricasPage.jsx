@@ -1,5 +1,10 @@
+import { motion } from 'framer-motion'
+import { IconChartBar, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { calcularCostoViaje, claseTarifaria } from '../data/mockTarifas.js'
+import AnimatedNumber from '../components/AnimatedNumber.jsx'
+
+const EASE = [0.16, 1, 0.3, 1]
 
 function inicioSemana(timestamp) {
   const d = new Date(timestamp)
@@ -34,10 +39,6 @@ function resumenSemana(trips) {
   )
 }
 
-function formatoMoneda(valor) {
-  return `$${valor.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
-}
-
 function delta(actual, anterior) {
   if (!anterior) return null
   return ((actual - anterior) / anterior) * 100
@@ -47,22 +48,32 @@ function Delta({ actual, anterior }) {
   const cambio = delta(actual, anterior)
   if (cambio === null) return <span className="kpi-delta">sin referencia</span>
   const arriba = cambio >= 0
+  const Icon = arriba ? IconTrendingUp : IconTrendingDown
   return (
     <span className={`kpi-delta ${arriba ? 'kpi-delta-up' : 'kpi-delta-down'}`}>
-      {arriba ? '▲' : '▼'} {Math.abs(cambio).toFixed(0)}% vs. semana anterior
+      <Icon size={13} stroke={2} />
+      {Math.abs(cambio).toFixed(0)}% vs. semana anterior
     </span>
   )
 }
 
 const KPIS = [
-  { key: 'cantidad', label: 'Viajes de la semana', formato: (v) => v.toLocaleString('es-MX') },
-  { key: 'km', label: 'Km recorridos', formato: (v) => `${v.toLocaleString('es-MX')} km` },
+  {
+    key: 'cantidad',
+    label: 'Viajes de la semana',
+    formato: (v) => Math.round(v).toLocaleString('es-MX'),
+  },
+  { key: 'km', label: 'Km recorridos', formato: (v) => `${Math.round(v).toLocaleString('es-MX')} km` },
   {
     key: 'volumen',
     label: 'Volumen transportado',
-    formato: (v) => `${v.toLocaleString('es-MX')} m³`,
+    formato: (v) => `${v.toLocaleString('es-MX', { maximumFractionDigits: 1 })} m³`,
   },
-  { key: 'costo', label: 'Costo de los viajes', formato: formatoMoneda },
+  {
+    key: 'costo',
+    label: 'Costo de los viajes',
+    formato: (v) => `$${Math.round(v).toLocaleString('es-MX')}`,
+  },
 ]
 
 const CATEGORIAS = ['Material', 'Carpeta Asfáltica', 'Roca']
@@ -75,7 +86,10 @@ function MetricasPage() {
     return (
       <section>
         <h1>Métricas</h1>
-        <p>Aún no hay viajes registrados con datos suficientes para calcular métricas.</p>
+        <div className="empty-state">
+          <IconChartBar size={26} stroke={1.5} />
+          <p>Aún no hay viajes registrados con datos suficientes para calcular métricas.</p>
+        </div>
       </section>
     )
   }
@@ -108,12 +122,20 @@ function MetricasPage() {
       </p>
 
       <div className="kpi-grid">
-        {KPIS.map(({ key, label, formato }) => (
-          <div className="kpi-card" key={key}>
+        {KPIS.map(({ key, label, formato }, i) => (
+          <motion.div
+            className="kpi-card"
+            key={key}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.26, ease: EASE, delay: i * 0.05 }}
+          >
             <span className="kpi-label">{label}</span>
-            <span className="kpi-value">{formato(actual[key])}</span>
+            <span className="kpi-value">
+              <AnimatedNumber value={actual[key]} formato={formato} />
+            </span>
             <Delta actual={actual[key]} anterior={anterior[key]} />
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -132,9 +154,9 @@ function MetricasPage() {
               <tbody>
                 {porCategoria.map((row) => (
                   <tr key={row.categoria}>
-                    <td>{row.categoria}</td>
+                    <td style={{ fontFamily: 'var(--font-sans)' }}>{row.categoria}</td>
                     <td>{row.cantidad}</td>
-                    <td>{formatoMoneda(row.costo)}</td>
+                    <td>${row.costo.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</td>
                   </tr>
                 ))}
               </tbody>

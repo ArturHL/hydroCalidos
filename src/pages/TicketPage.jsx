@@ -1,5 +1,9 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { IconAlertTriangle, IconPlus, IconPrinter } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
+
+const EASE = [0.16, 1, 0.3, 1]
 
 const FIELD_LABELS = {
   folio: 'Folio',
@@ -28,10 +32,19 @@ function TicketPage() {
   }
 
   return (
-    <section>
+    <motion.section
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.28, ease: EASE }}
+    >
       <h1>Ticket generado</h1>
+
       {trip.excepcion && (
         <p className="field-hint">
+          <span className="badge badge-warning">
+            <IconAlertTriangle size={13} stroke={2} />
+            Excepción de distancia
+          </span>{' '}
           Este viaje quedó marcado con excepción por distancia fuera de lo esperado.
         </p>
       )}
@@ -48,20 +61,28 @@ function TicketPage() {
       </dl>
 
       {trip.costoEstimado != null && (
-        <p className="field-hint">
-          Costo estimado del viaje: <strong>${trip.costoEstimado.toLocaleString('es-MX')}</strong>
-        </p>
+        <div className="ticket-cost">
+          <span className="ticket-cost-label">Costo estimado del viaje</span>
+          <span className="ticket-cost-value">${trip.costoEstimado.toLocaleString('es-MX')}</span>
+        </div>
       )}
 
       <div className="ticket-actions no-print">
-        <button type="button" className="btn-secondary" onClick={() => window.print()}>
+        <motion.button
+          type="button"
+          className="btn-secondary"
+          whileTap={{ scale: 0.97 }}
+          onClick={() => window.print()}
+        >
+          <IconPrinter size={16} stroke={2} />
           Imprimir
-        </button>
+        </motion.button>
         <Link to="/formulario" className="btn-primary">
+          <IconPlus size={16} stroke={2} />
           Registrar otro viaje
         </Link>
       </div>
-    </section>
+    </motion.section>
   )
 }
 

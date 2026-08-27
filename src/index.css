@@ -1,78 +1,84 @@
+/*
+  Sistema de diseño — hydroCalidos
+  Dominio: back-office de ingeniería civil para acarreo de material en obra
+  carretera (licitaciones federales). Tinta de plano topográfico sobre papel,
+  no "app de campo con chaleco de seguridad". Tema claro único — sin dark
+  mode: es una decisión de producto, no una omisión.
+*/
+
 :root {
-  --bg: #faf7f2;
+  /* Superficies — papel frío, no crema cálido */
+  --paper: #f4f5f7;
   --surface: #ffffff;
-  --border: #e5ddcf;
-  --border-strong: #d5c9b3;
+  --surface-inset: #f7f8fa; /* inputs: más oscuros que su entorno, "reciben" contenido */
+  --surface-raised: #fbfbfd; /* dropdowns/overlays: un nivel arriba de --surface */
 
-  --text: #5c574c;
-  --text-h: #292520;
-  --text-muted: #928c7d;
+  /* Texto — jerarquía de cuatro niveles (contraste AA verificado sobre
+     --surface/--paper, incluso a 11px en mayúsculas) */
+  --ink-900: #10151f;
+  --ink-700: #2b3242;
+  --ink-500: #4b5568;
+  --ink-300: #667085;
 
-  --accent: #3e5c66;
-  --accent-hover: #314951;
-  --accent-bg: rgba(62, 92, 102, 0.08);
-  --accent-border: rgba(62, 92, 102, 0.32);
-  --accent-contrast: #fbfaf7;
+  /* Bordes — progresión de intensidad, nunca simulan elevación */
+  --border-subtle: rgba(16, 21, 31, 0.06);
+  --border: rgba(16, 21, 31, 0.1);
+  --border-strong: rgba(16, 21, 31, 0.18);
 
-  --success: #4f7a5c;
-  --success-bg: rgba(79, 122, 92, 0.12);
-  --success-border: rgba(79, 122, 92, 0.35);
+  /* Acento — tinta de plano azul profundo, institucional, no morado de SaaS */
+  --accent: #1d3a66;
+  --accent-hover: #16294c;
+  --accent-bg: rgba(29, 58, 102, 0.07);
+  --accent-border: rgba(29, 58, 102, 0.28);
+  --accent-contrast: #ffffff;
 
-  --warning: #a86a34;
-  --warning-bg: rgba(168, 106, 52, 0.13);
-  --warning-border: rgba(168, 106, 52, 0.35);
+  /* Semántico — desaturado, con carácter de sello/tinta oficial */
+  --success: #2f6f5e;
+  --success-bg: rgba(47, 111, 94, 0.09);
+  --success-border: rgba(47, 111, 94, 0.3);
 
-  --danger: #a04a3d;
-  --danger-bg: rgba(160, 74, 61, 0.1);
-  --danger-border: rgba(160, 74, 61, 0.35);
+  --warning: #9a6b23;
+  --warning-bg: rgba(154, 107, 35, 0.1);
+  --warning-border: rgba(154, 107, 35, 0.32);
 
-  --shadow-sm: 0 1px 2px rgba(41, 37, 32, 0.06);
-  --shadow-md: 0 4px 16px rgba(41, 37, 32, 0.08);
+  --danger: #9b3a34;
+  --danger-bg: rgba(155, 58, 52, 0.09);
+  --danger-border: rgba(155, 58, 52, 0.3);
 
-  --sans: 'Segoe UI', system-ui, Roboto, sans-serif;
+  /* Profundidad — sombras suaves por capas, un solo sistema, solo en
+     superficies elevadas (tarjetas, ticket, overlays). Los bordes nunca
+     simulan elevación. */
+  --shadow-sm: 0 1px 2px rgba(16, 21, 31, 0.04), 0 1px 1px rgba(16, 21, 31, 0.03);
+  --shadow-md: 0 0 0 1px rgba(16, 21, 31, 0.03), 0 2px 4px rgba(16, 21, 31, 0.04),
+    0 6px 12px rgba(16, 21, 31, 0.04);
+  --shadow-lg: 0 0 0 1px rgba(16, 21, 31, 0.04), 0 4px 8px rgba(16, 21, 31, 0.04),
+    0 12px 24px rgba(16, 21, 31, 0.05), 0 24px 48px rgba(16, 21, 31, 0.05);
 
-  font: 15px/1.55 var(--sans);
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  /* Tipografía — tres voces de la misma familia (IBM Plex): serif para
+     gravedad institucional, sans para UI, mono para todo dato numérico */
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Radio — restrained, técnico, no burbujeante */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Movimiento — desaceleración, sin rebote (interfaz profesional) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+
+  font: 15px/1.55 var(--font-sans);
+  color-scheme: light;
+  color: var(--ink-700);
+  background: var(--paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1a17;
-    --surface: #252220;
-    --border: #3a352c;
-    --border-strong: #4c453a;
-
-    --text: #b6afa1;
-    --text-h: #f2ede3;
-    --text-muted: #857e70;
-
-    --accent: #86adb8;
-    --accent-hover: #9dbdc7;
-    --accent-bg: rgba(134, 173, 184, 0.14);
-    --accent-border: rgba(134, 173, 184, 0.4);
-    --accent-contrast: #16211f;
-
-    --success: #8fb89b;
-    --success-bg: rgba(143, 184, 155, 0.14);
-    --success-border: rgba(143, 184, 155, 0.38);
-
-    --warning: #d8a165;
-    --warning-bg: rgba(216, 161, 101, 0.16);
-    --warning-border: rgba(216, 161, 101, 0.4);
-
-    --danger: #cb8072;
-    --danger-bg: rgba(203, 128, 114, 0.16);
-    --danger-border: rgba(203, 128, 114, 0.4);
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
-  }
 }
 
 * {
@@ -89,18 +95,39 @@ body {
   flex-direction: column;
 }
 
-h1, h2 {
+h1,
+h2 {
+  font-family: var(--font-serif);
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text-h);
+  color: var(--ink-900);
   margin: 0 0 16px;
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 28px;
 }
 
 h2 {
-  font-size: 17px;
-  margin-top: 32px;
+  font-size: 18px;
+  margin-top: 36px;
+}
+
+/* Todo dato numérico/identificador (folios, distancias, costos, placas)
+   usa mono con figuras tabulares — es la firma tipográfica del sistema. */
+.mono,
+.mono-nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

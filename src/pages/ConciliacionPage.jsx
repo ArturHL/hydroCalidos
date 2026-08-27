@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { IconCheck, IconDownload, IconInbox, IconRefresh, IconSend } from '@tabler/icons-react'
 import { ROLES, useRole } from '../context/RoleContext.jsx'
 import { useTrips } from '../context/TripsContext.jsx'
 import { useConciliacion } from '../context/ConciliacionContext.jsx'
 import { exportarConciliacionXlsx } from '../utils/exportConciliacion.js'
+import AnimatedTabs from '../components/AnimatedTabs.jsx'
+import TurnoIndicator from '../components/TurnoIndicator.jsx'
 
 const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r.id, r.label]))
+const EASE = [0.16, 1, 0.3, 1]
 
 // Mismas columnas de datos completos que RecordsPage (/registros) — el
 // socio pidió explícitamente que Conciliación no muestre una versión
@@ -148,7 +153,12 @@ function EnProceso() {
 
   if (!proposal) {
     if (exceptionTrips.length === 0) {
-      return <p>No hay excepciones pendientes de conciliar esta semana.</p>
+      return (
+        <div className="empty-state">
+          <IconInbox size={26} stroke={1.5} />
+          <p>No hay excepciones pendientes de conciliar esta semana.</p>
+        </div>
+      )
     }
 
     return (
@@ -163,16 +173,18 @@ function EnProceso() {
           mensaje={mensaje}
           setMensaje={setMensaje}
         />
-        <button
+        <motion.button
           type="button"
           className="btn-primary"
+          whileTap={{ scale: 0.97 }}
           onClick={() => {
             enviarPropuesta({ autor: role, ediciones, mensaje })
             setMensaje('')
           }}
         >
+          <IconSend size={16} stroke={2} />
           Enviar solicitud de aprobación
-        </button>
+        </motion.button>
       </>
     )
   }
@@ -182,7 +194,8 @@ function EnProceso() {
 
   return (
     <>
-      <p className="field-hint">
+      <TurnoIndicator turno={proposal.turno} />
+      <p className="field-hint" style={{ marginTop: 4, marginBottom: 20 }}>
         {esMiTurno
           ? 'Es tu turno de responder esta propuesta.'
           : `Esperando respuesta de ${ROLE_LABEL[proposal.turno]}.`}
@@ -225,9 +238,10 @@ function EnProceso() {
 
       {esMiTurno && !contraofertando && (
         <div className="ticket-actions">
-          <button
+          <motion.button
             type="button"
             className="btn-accept"
+            whileTap={{ scale: 0.97 }}
             onClick={() =>
               aceptarPropuesta({
                 autor: role,
@@ -239,8 +253,9 @@ function EnProceso() {
               })
             }
           >
+            <IconCheck size={16} stroke={2} />
             Aceptar conciliación
-          </button>
+          </motion.button>
           <button
             type="button"
             className="btn-secondary"
@@ -249,23 +264,26 @@ function EnProceso() {
               setContraofertando(true)
             }}
           >
+            <IconRefresh size={16} stroke={2} />
             Modificar y reenviar
           </button>
         </div>
       )}
 
       {esMiTurno && contraofertando && (
-        <button
+        <motion.button
           type="button"
           className="btn-primary"
+          whileTap={{ scale: 0.97 }}
           onClick={() => {
             enviarPropuesta({ autor: role, ediciones, mensaje })
             setMensaje('')
             setContraofertando(false)
           }}
         >
+          <IconSend size={16} stroke={2} />
           Enviar contraoferta
-        </button>
+        </motion.button>
       )}
 
       <h2>Historial de la negociación</h2>
@@ -279,15 +297,34 @@ function Historial() {
   const { trips } = useTrips()
 
   if (historial.length === 0) {
-    return <p>Aún no hay conciliaciones cerradas.</p>
+    return (
+      <div className="empty-state">
+        <IconInbox size={26} stroke={1.5} />
+        <p>Aún no hay conciliaciones cerradas.</p>
+      </div>
+    )
   }
 
   return (
-    <ul className="rondas-trail">
-      {historial.map((c) => (
-        <li key={c.id}>
-          <strong>Conciliación cerrada</strong> — {c.fechaCierre} (aceptada por {ROLE_LABEL[c.cerradoPor]})
-          <p>{Object.keys(c.ediciones).length} viaje(s) ajustado(s)</p>
+    <div>
+      {historial.map((c, i) => (
+        <motion.div
+          key={c.id}
+          className="historial-entry"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: EASE, delay: Math.min(i, 6) * 0.03 }}
+        >
+          <div className="historial-entry-head">
+            <strong>Conciliación cerrada</strong>
+            <span className="badge badge-success">
+              <IconCheck size={12} stroke={2} />
+              {c.fechaCierre}
+            </span>
+          </div>
+          <p className="field-hint" style={{ margin: '0 0 8px' }}>
+            Aceptada por {ROLE_LABEL[c.cerradoPor]} · {Object.keys(c.ediciones).length} viaje(s) ajustado(s)
+          </p>
           <RondasTrail rondas={c.rondas} />
           <div className="ticket-actions">
             <button
@@ -295,12 +332,13 @@ function Historial() {
               className="btn-secondary"
               onClick={() => exportarConciliacionXlsx(c, trips)}
             >
+              <IconDownload size={16} stroke={2} />
               Descargar Excel
             </button>
           </div>
-        </li>
+        </motion.div>
       ))}
-    </ul>
+    </div>
   )
 }
 
@@ -311,22 +349,14 @@ function ConciliacionPage() {
     <section>
       <h1>Conciliación</h1>
 
-      <div className="tabs">
-        <button
-          type="button"
-          className={tab === 'proceso' ? 'active' : ''}
-          onClick={() => setTab('proceso')}
-        >
-          En proceso
-        </button>
-        <button
-          type="button"
-          className={tab === 'historial' ? 'active' : ''}
-          onClick={() => setTab('historial')}
-        >
-          Historial
-        </button>
-      </div>
+      <AnimatedTabs
+        tabs={[
+          { id: 'proceso', label: 'En proceso' },
+          { id: 'historial', label: 'Historial' },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
       {tab === 'proceso' ? <EnProceso /> : <Historial />}
     </section>
