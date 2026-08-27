@@ -52,20 +52,27 @@ src/
 2. **Ticket generado** (`/ticket/:id`): resumen de datos + botón Imprimir (`window.print()`, básico, sin diseño de impresión elaborado) + volver a capturar otro viaje.
 3. **Registros** (`/registros`, rol Contador): tabla de todos los viajes capturados, con badge de "Excepción" cuando la distancia no coincidió con la esperada.
 4. **Conciliación** (`/conciliacion`, rol Contador): tab "En proceso" (revisar/editar excepciones de la semana, enviar propuesta, turno alterna entre las dos partes, aceptar aplica los cambios al viaje y limpia la excepción) y tab "Historial" (conciliaciones cerradas con el rastro completo de rondas).
-5. **Contrato actual** (`/contrato`, rol Contador): mismo patrón de negociación que Conciliación pero sobre las tarifas (precio primer km / consecutivo por clase de material). Tab "Acuerdo actual" (tabla vigente + Solicitar revisión) y tab "Historial". También lista el catálogo de bancos/materiales como referencia de solo lectura.
+5. **Contrato actual** (`/contrato`, rol Contador): mismo patrón de negociación que Conciliación pero sobre las tarifas (5 bandas de distancia × 3 categorías de material — ver más abajo). Tab "Acuerdo actual" (tabla vigente + Solicitar revisión) y tab "Historial". También lista el catálogo de bancos/materiales como referencia de solo lectura.
+6. **Métricas** (`/metricas`, rol Contador): KPIs de la semana actual vs. la anterior (viajes, km, volumen transportado, costo), desglose de costo por categoría de material, todo calculado con `calcularCostoViaje`. Sin combustible/diésel, como se pidió.
 
-Los flujos de Conciliación y Contrato actual se probaron end-to-end con un script de Puppeteer headless (no versionado, se usó y se borró en la sesión) simulando cambio de rol entre las dos partes — pasaron todos los checks.
+Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada.
 
-## Siguiente paso lógico: pantalla de Métricas
+## Métricas: ya no es un placeholder
 
-Es lo único que falta de las 6 pantallas planeadas. Antes de construirla hay que cerrar con el usuario **cómo calcular el "costo del viaje"**, porque las métricas dependen de eso:
+Se completó usando la fórmula real de costo por viaje descubierta al analizar tickets y un Excel de conciliación reales de un proyecto carretero (documentado en el proyecto hermano `Volteo`, `docs/business/HALLAZGOS_MUESTRAS.md`):
 
-- La fórmula de tarifas ya vive en `mockTarifas.js` / `ContratoContext` (primer km + consecutivo, con tramo distinto desde 20km), pero nunca se conectó a un cálculo real de costo por viaje usando `capacidad` y `distancia` del ticket.
-- KPIs ya pedidos por el usuario en el levantamiento de requerimientos: cantidad de viajes de la semana, km recorridos, capacidad transportada, costo de los viajes, y una tabla comparativa de productividad semana actual vs. anterior.
-- Sigue vigente la instrucción de **omitir combustible** (no incluir costo de diésel/casetas en estos KPIs).
-- Falta decidir: ¿la vista de Métricas es la misma para ambos roles de Contador o cada uno ve solo "su lado"? (dado que simplificamos a una sola relación Constructora↔Transportista, probablemente no importe mucho, pero conviene confirmarlo).
+```
+costo_total = volumen_m³ × Σ (km en cada banda de distancia × precio unitario de esa banda)
+```
 
-Cuando se retome, proponer la fórmula de cálculo de costo al usuario antes de implementar (así lo pidió explícitamente la última vez que se tocó el tema).
+Esto también motivó dos cambios más en el modelo de datos del demo:
+
+- **`mockTarifas.js`** pasó de 2 clases/2 bandas (una simplificación razonable pero inventada) a **3 categorías** (Material, Carpeta Asfáltica, Roca) **× 5 bandas de distancia** (1er km, 2-20, 21-40, 41-70, 71+), con montos de un tarifario real (San Luis Potosí) — no son la tarifa vigente de ningún cliente, pero ya no están inventados de la nada.
+- **El Formulario separa "Capacidad nominal del camión" de "Volumen real transportado en este viaje"** — los datos reales muestran que el volumen se mide por viaje (varía viaje a viaje), no es la capacidad fija del camión. Antes el demo solo tenía "Capacidad", tratándola como si fuera lo que se factura.
+- **`DESTINOS`** pasó de nombres libres mezclados con cadenamiento ("Puente Los Pinos", "Tramo Km 12+000") a puro formato de cadenamiento (km+m), que es como se captura en la realidad.
+- Se agregó un campo opcional de **Representante del Transportista** al ticket (dato real visto en el Excel: una persona específica, no solo la organización).
+
+Pendiente aún: si la vista de Métricas debe diferenciarse por rol de Contador (Constructora vs. Transportista) — sigue sin importar mucho con una sola relación simplificada, pero conviene confirmarlo si se agrega multi-organización al demo en el futuro.
 
 ## Convenciones a seguir
 

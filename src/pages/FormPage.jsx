@@ -7,6 +7,7 @@ import {
   distanciaEsperada,
   materialesPorBanco,
 } from '../data/mockContract.js'
+import { calcularCostoViaje } from '../data/mockTarifas.js'
 
 const EMPTY_FORM = {
   origen: '',
@@ -16,8 +17,10 @@ const EMPTY_FORM = {
   justificacion: '',
   placa: '',
   capacidad: '',
+  volumen: '',
   operador: '',
   checador: '',
+  representanteTransportista: '',
   coordSalida: '',
   coordLlegada: '',
 }
@@ -33,6 +36,12 @@ function FormPage() {
     form.origen && form.destino ? distanciaEsperada(form.origen, form.destino) : null
   const distanciaModificada =
     esperada !== null && form.distancia !== '' && Number(form.distancia) !== esperada
+
+  const costoEstimado = calcularCostoViaje({
+    material: form.material,
+    distanciaKm: form.distancia,
+    volumenM3: form.volumen,
+  })
 
   function updateField(field, value) {
     setError('')
@@ -65,7 +74,7 @@ function FormPage() {
       'destino',
       'distancia',
       'placa',
-      'capacidad',
+      'volumen',
       'operador',
       'checador',
       'coordSalida',
@@ -88,6 +97,7 @@ function FormPage() {
       ...form,
       distanciaEsperada: esperada,
       excepcion: distanciaModificada,
+      costoEstimado,
     })
     setForm(EMPTY_FORM)
     navigate(`/ticket/${trip.id}`)
@@ -133,7 +143,7 @@ function FormPage() {
         </label>
 
         <label>
-          Destino
+          Destino (cadenamiento)
           <select
             name="destino"
             value={form.destino}
@@ -185,13 +195,29 @@ function FormPage() {
         </label>
 
         <label>
-          Capacidad (m³)
+          Capacidad nominal del camión (m³)
           <input
             type="number"
             name="capacidad"
             min="0"
             value={form.capacidad}
             onChange={(e) => updateField('capacidad', e.target.value)}
+          />
+        </label>
+        <p className="field-hint">
+          Referencia del camión — no es lo que se cobra. Lo que se factura es el volumen real de
+          este viaje, abajo.
+        </p>
+
+        <label>
+          Volumen real transportado en este viaje (m³)
+          <input
+            type="number"
+            name="volumen"
+            min="0"
+            step="0.1"
+            value={form.volumen}
+            onChange={(e) => updateField('volumen', e.target.value)}
           />
         </label>
 
@@ -216,6 +242,16 @@ function FormPage() {
         </label>
 
         <label>
+          Representante del Transportista (opcional)
+          <input
+            type="text"
+            name="representanteTransportista"
+            value={form.representanteTransportista}
+            onChange={(e) => updateField('representanteTransportista', e.target.value)}
+          />
+        </label>
+
+        <label>
           Coordenadas de salida
           <input
             type="text"
@@ -236,6 +272,10 @@ function FormPage() {
             onChange={(e) => updateField('coordLlegada', e.target.value)}
           />
         </label>
+
+        {costoEstimado !== null && (
+          <p className="field-hint">Costo estimado de este viaje: ${costoEstimado.toLocaleString('es-MX')}</p>
+        )}
 
         {error && <p className="field-error">{error}</p>}
 

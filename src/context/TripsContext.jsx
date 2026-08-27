@@ -17,10 +17,12 @@ export function TripsProvider({ children }) {
 
   function addTrip(data) {
     const folio = `TCK-${String(trips.length + 1).padStart(4, '0')}`
+    const now = new Date()
     const trip = {
       id: crypto.randomUUID(),
       folio,
-      fecha: new Date().toLocaleDateString('es-MX'),
+      fecha: now.toLocaleDateString('es-MX'),
+      timestamp: now.getTime(),
       ...data,
     }
     const next = [trip, ...trips]

@@ -2,29 +2,30 @@ import { useState } from 'react'
 import { ROLES, useRole } from '../context/RoleContext.jsx'
 import { useContrato } from '../context/ContratoContext.jsx'
 import { BANCOS } from '../data/mockContract.js'
+import { BANDAS_DISTANCIA } from '../data/mockTarifas.js'
 
 const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r.id, r.label]))
-const CLASES = ['Piedra', 'Otros']
 
 function TarifasTable({ tarifas }) {
+  const clases = Object.keys(tarifas)
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Clase de material</th>
-            <th>Precio primer km</th>
-            <th>Precio consecutivo (&lt;20 km)</th>
-            <th>Precio consecutivo (≥20 km)</th>
+            <th>Categoría de material</th>
+            {BANDAS_DISTANCIA.map((banda) => (
+              <th key={banda.key}>{banda.label}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {CLASES.map((clase) => (
+          {clases.map((clase) => (
             <tr key={clase}>
-              <td>{clase === 'Piedra' ? 'Piedra' : 'Resto de materiales'}</td>
-              <td>${tarifas[clase].primerKm}</td>
-              <td>${tarifas[clase].consecutivoMenor20}</td>
-              <td>${tarifas[clase].consecutivoDesde20}</td>
+              <td>{clase}</td>
+              {BANDAS_DISTANCIA.map((banda) => (
+                <td key={banda.key}>${tarifas[clase][banda.key]}</td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -34,6 +35,8 @@ function TarifasTable({ tarifas }) {
 }
 
 function TarifasForm({ tarifas, setTarifas }) {
+  const clases = Object.keys(tarifas)
+
   function updateValor(clase, campo, valor) {
     setTarifas((prev) => ({
       ...prev,
@@ -46,24 +49,24 @@ function TarifasForm({ tarifas, setTarifas }) {
       <table>
         <thead>
           <tr>
-            <th>Clase de material</th>
-            <th>Precio primer km</th>
-            <th>Precio consecutivo (&lt;20 km)</th>
-            <th>Precio consecutivo (≥20 km)</th>
+            <th>Categoría de material</th>
+            {BANDAS_DISTANCIA.map((banda) => (
+              <th key={banda.key}>{banda.label}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {CLASES.map((clase) => (
+          {clases.map((clase) => (
             <tr key={clase}>
-              <td>{clase === 'Piedra' ? 'Piedra' : 'Resto de materiales'}</td>
-              {['primerKm', 'consecutivoMenor20', 'consecutivoDesde20'].map((campo) => (
-                <td key={campo}>
+              <td>{clase}</td>
+              {BANDAS_DISTANCIA.map((banda) => (
+                <td key={banda.key}>
                   <input
                     type="number"
                     step="0.5"
                     min="0"
-                    value={tarifas[clase][campo]}
-                    onChange={(e) => updateValor(clase, campo, e.target.value)}
+                    value={tarifas[clase][banda.key]}
+                    onChange={(e) => updateValor(clase, banda.key, e.target.value)}
                   />
                 </td>
               ))}

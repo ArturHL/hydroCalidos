@@ -9,9 +9,11 @@ const FIELD_LABELS = {
   destino: 'Destino',
   distancia: 'Distancia (km)',
   placa: 'Placa',
-  capacidad: 'Capacidad (m³)',
+  capacidad: 'Capacidad nominal del camión (m³)',
+  volumen: 'Volumen real transportado (m³)',
   operador: 'Operador',
   checador: 'Checador',
+  representanteTransportista: 'Representante del Transportista',
   coordSalida: 'Coordenadas de salida',
   coordLlegada: 'Coordenadas de llegada',
 }
@@ -35,13 +37,21 @@ function TicketPage() {
       )}
 
       <dl className="ticket-summary">
-        {Object.entries(FIELD_LABELS).map(([field, label]) => (
-          <div key={field}>
-            <dt>{label}</dt>
-            <dd>{trip[field]}</dd>
-          </div>
-        ))}
+        {Object.entries(FIELD_LABELS)
+          .filter(([field]) => trip[field])
+          .map(([field, label]) => (
+            <div key={field}>
+              <dt>{label}</dt>
+              <dd>{trip[field]}</dd>
+            </div>
+          ))}
       </dl>
+
+      {trip.costoEstimado != null && (
+        <p className="field-hint">
+          Costo estimado del viaje: <strong>${trip.costoEstimado.toLocaleString('es-MX')}</strong>
+        </p>
+      )}
 
       <div className="ticket-actions no-print">
         <button type="button" className="btn-secondary" onClick={() => window.print()}>

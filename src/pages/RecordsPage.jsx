@@ -25,6 +25,8 @@ function RecordsPage() {
               <th>Material</th>
               <th>Destino</th>
               <th>Distancia</th>
+              <th>Volumen (m³)</th>
+              <th>Costo est.</th>
               <th>Placa</th>
               <th>Operador</th>
               <th>Checador</th>
@@ -40,6 +42,8 @@ function RecordsPage() {
                 <td>{trip.material}</td>
                 <td>{trip.destino}</td>
                 <td>{trip.distancia} km</td>
+                <td>{trip.volumen ?? '—'}</td>
+                <td>{trip.costoEstimado != null ? `$${trip.costoEstimado.toLocaleString('es-MX')}` : '—'}</td>
                 <td>{trip.placa}</td>
                 <td>{trip.operador}</td>
                 <td>{trip.checador}</td>

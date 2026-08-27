@@ -21,34 +21,32 @@ export const BANCOS = [
   },
 ]
 
-export const DESTINOS = [
-  'Tramo Km 12+000',
-  'Tramo Tres Marías',
-  'Puente Los Pinos',
-  'Entronque Sur',
-]
+// Formato de cadenamiento (km+m), como se captura en tickets reales del sector
+// (ver docs/business/HALLAZGOS_MUESTRAS.md en el proyecto Volteo) — no un nombre
+// de lugar libre.
+export const DESTINOS = ['12+000', '18+300', '25+750', '9+400']
 
 const DISTANCIAS_ESPERADAS = {
-  'Banco El Águila|Tramo Km 12+000': 12,
-  'Banco El Águila|Tramo Tres Marías': 18,
-  'Banco El Águila|Puente Los Pinos': 25,
-  'Banco El Águila|Entronque Sur': 9,
-  'Banco La Cantera|Tramo Km 12+000': 15,
-  'Banco La Cantera|Tramo Tres Marías': 22,
-  'Banco La Cantera|Puente Los Pinos': 30,
-  'Banco La Cantera|Entronque Sur': 14,
-  'Planta Asfáltica Sur|Tramo Km 12+000': 8,
-  'Planta Asfáltica Sur|Tramo Tres Marías': 16,
-  'Planta Asfáltica Sur|Puente Los Pinos': 20,
-  'Planta Asfáltica Sur|Entronque Sur': 11,
-  'Patio de Prefabricados|Tramo Km 12+000': 10,
-  'Patio de Prefabricados|Tramo Tres Marías': 19,
-  'Patio de Prefabricados|Puente Los Pinos': 27,
-  'Patio de Prefabricados|Entronque Sur': 13,
-  'Sitio de Tiro Norte|Tramo Km 12+000': 6,
-  'Sitio de Tiro Norte|Tramo Tres Marías': 14,
-  'Sitio de Tiro Norte|Puente Los Pinos': 21,
-  'Sitio de Tiro Norte|Entronque Sur': 7,
+  'Banco El Águila|12+000': 12,
+  'Banco El Águila|18+300': 18,
+  'Banco El Águila|25+750': 25,
+  'Banco El Águila|9+400': 9,
+  'Banco La Cantera|12+000': 15,
+  'Banco La Cantera|18+300': 22,
+  'Banco La Cantera|25+750': 30,
+  'Banco La Cantera|9+400': 14,
+  'Planta Asfáltica Sur|12+000': 8,
+  'Planta Asfáltica Sur|18+300': 16,
+  'Planta Asfáltica Sur|25+750': 20,
+  'Planta Asfáltica Sur|9+400': 11,
+  'Patio de Prefabricados|12+000': 10,
+  'Patio de Prefabricados|18+300': 19,
+  'Patio de Prefabricados|25+750': 27,
+  'Patio de Prefabricados|9+400': 13,
+  'Sitio de Tiro Norte|12+000': 6,
+  'Sitio de Tiro Norte|18+300': 14,
+  'Sitio de Tiro Norte|25+750': 21,
+  'Sitio de Tiro Norte|9+400': 7,
 }
 
 export function materialesPorBanco(banco) {
