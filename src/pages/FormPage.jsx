@@ -108,7 +108,7 @@ function FormPage() {
   }
 
   return (
-    <section>
+    <section className="page-narrow">
       <h1>Formulario</h1>
       <form onSubmit={handleSubmit} className="trip-form">
         <div className="form-section">

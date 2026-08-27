@@ -33,6 +33,7 @@ function TicketPage() {
 
   return (
     <motion.section
+      className="page-narrow"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.28, ease: EASE }}
