@@ -75,6 +75,22 @@ Esto también motivó dos cambios más en el modelo de datos del demo:
 
 Pendiente aún: si la vista de Métricas debe diferenciarse por rol de Contador (Constructora vs. Transportista) — sigue sin importar mucho con una sola relación simplificada, pero conviene confirmarlo si se agrega multi-organización al demo en el futuro.
 
+## Datos de ejemplo para pitch (SeedMenu)
+
+Botón discreto arriba a la derecha del header (ícono de base de datos, junto
+al selector de rol) — `src/components/SeedMenu.jsx` / `src/data/seedData.js`.
+"Cargar datos de ejemplo" puebla los 4 stores de localStorage con 11 viajes
+que cubren todos los escenarios ya construidos sin tener que capturarlos a
+mano antes de una demo: los 5 bancos, las 3 categorías de tarifa, dos
+semanas distintas (para que Métricas tenga una comparativa real en vez de
+"sin referencia"), una excepción ya resuelta con su conciliación cerrada
+(exportable a Excel), una excepción pendiente lista para "Iniciar
+conciliación semanal" en vivo, y una revisión de contrato ya cerrada. Pensado
+para que en un pitch solo se capture UN viaje nuevo a mano (para mostrar el
+Formulario funcionando) y todo lo demás ya exista. "Borrar todos los datos"
+regresa todo a cero para volver a ensayar. Ninguno de los dos toca datos
+reales — solo localStorage del navegador.
+
 ## Convenciones a seguir
 
 - No usar TypeScript, no agregar backend real: sigue siendo una maqueta.

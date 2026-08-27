@@ -9,6 +9,7 @@ import {
   IconTable,
 } from '@tabler/icons-react'
 import { ROLES, useRole } from './context/RoleContext.jsx'
+import SeedMenu from './components/SeedMenu.jsx'
 import FormPage from './pages/FormPage'
 import TicketPage from './pages/TicketPage'
 import RecordsPage from './pages/RecordsPage'
@@ -89,16 +90,19 @@ function App() {
           ))}
         </nav>
 
-        <label className="role-switch">
-          Rol activo
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            {ROLES.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="header-actions">
+          <SeedMenu />
+          <label className="role-switch">
+            Rol activo
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              {ROLES.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
 
       <main className="app-main">
