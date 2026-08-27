@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { IconCheck, IconDownload, IconInbox, IconRefresh, IconSend } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconClipboardCheck,
+  IconDownload,
+  IconInbox,
+  IconRefresh,
+  IconSend,
+} from '@tabler/icons-react'
 import { ROLES, useRole } from '../context/RoleContext.jsx'
 import { useTrips } from '../context/TripsContext.jsx'
 import { useConciliacion } from '../context/ConciliacionContext.jsx'
@@ -140,34 +147,67 @@ function RondasTrail({ rondas }) {
 function EnProceso() {
   const { role } = useRole()
   const { trips, updateTrip } = useTrips()
-  const { proposal, enviarPropuesta, aceptarPropuesta } = useConciliacion()
-  const exceptionTrips = trips.filter((t) => t.excepcion)
+  const { abierta, tripIdsAbiertos, proposal, iniciarConciliacion, enviarPropuesta, aceptarPropuesta } =
+    useConciliacion()
 
-  const [ediciones, setEdiciones] = useState(() => buildInicial(exceptionTrips))
+  const exceptionTrips = trips.filter((t) => t.excepcion)
+  const tripsAbiertos = trips.filter((t) => tripIdsAbiertos.includes(t.id))
+  const nuevasExcepciones = abierta ? exceptionTrips.filter((t) => !tripIdsAbiertos.includes(t.id)) : []
+
+  const [ediciones, setEdiciones] = useState(() => buildInicial(tripsAbiertos))
   const [mensaje, setMensaje] = useState('')
   const [contraofertando, setContraofertando] = useState(false)
 
   useEffect(() => {
-    setEdiciones((prev) => buildInicial(exceptionTrips, prev))
-  }, [trips])
+    setEdiciones((prev) => buildInicial(tripsAbiertos, prev))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trips, abierta])
 
-  if (!proposal) {
+  // Paso 1: nadie ha "abierto" la conciliación todavía — es un paso
+  // deliberado, no algo que se dispare solo por existir excepciones.
+  if (!abierta) {
     if (exceptionTrips.length === 0) {
       return (
         <div className="empty-state">
           <IconInbox size={26} stroke={1.5} />
-          <p>No hay excepciones pendientes de conciliar esta semana.</p>
+          <p>No hay excepciones pendientes esta semana.</p>
         </div>
       )
     }
 
     return (
+      <div className="empty-state">
+        <IconClipboardCheck size={26} stroke={1.5} />
+        <p>
+          Hay {exceptionTrips.length} viaje{exceptionTrips.length === 1 ? '' : 's'} con excepción
+          esperando revisión.
+        </p>
+        <motion.button
+          type="button"
+          className="btn-primary"
+          whileTap={{ scale: 0.97 }}
+          onClick={() => iniciarConciliacion(exceptionTrips.map((t) => t.id))}
+        >
+          <IconClipboardCheck size={16} stroke={2} />
+          Iniciar conciliación semanal
+        </motion.button>
+      </div>
+    )
+  }
+
+  if (!proposal) {
+    return (
       <>
         <p className="field-hint">
           Revisa las excepciones de la semana y envía tu propuesta a la otra parte.
         </p>
+        {nuevasExcepciones.length > 0 && (
+          <p className="field-hint">
+            {nuevasExcepciones.length} excepción(es) nueva(s) quedarán para la próxima conciliación.
+          </p>
+        )}
         <EdicionesForm
-          trips={exceptionTrips}
+          trips={tripsAbiertos}
           ediciones={ediciones}
           setEdiciones={setEdiciones}
           mensaje={mensaje}
@@ -189,7 +229,7 @@ function EnProceso() {
     )
   }
 
-  const tripsEnPropuesta = exceptionTrips.filter((t) => proposal.ediciones[t.id])
+  const tripsEnPropuesta = tripsAbiertos.filter((t) => proposal.ediciones[t.id])
   const esMiTurno = proposal.turno === role
 
   return (

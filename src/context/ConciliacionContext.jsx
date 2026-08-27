@@ -4,7 +4,12 @@ const ConciliacionContext = createContext(null)
 
 const STORAGE_KEY = 'hydrocalidos_conciliacion'
 
-const EMPTY_STATE = { proposal: null, historial: [] }
+// `abierta`/`tripIdsAbiertos`: un Contador tiene que "abrir" la conciliación
+// semanal explícitamente — no se dispara solo con que existan excepciones.
+// El conjunto de viajes bajo revisión queda fijo (snapshot) al momento de
+// abrir; excepciones nuevas que lleguen después esperan a la siguiente
+// conciliación, no se cuelan a media negociación.
+const EMPTY_STATE = { abierta: false, tripIdsAbiertos: [], proposal: null, historial: [] }
 
 function loadState() {
   try {
@@ -26,6 +31,10 @@ export function ConciliacionProvider({ children }) {
   function persist(next) {
     setState(next)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  }
+
+  function iniciarConciliacion(tripIds) {
+    persist({ ...state, abierta: true, tripIdsAbiertos: tripIds })
   }
 
   function enviarPropuesta({ autor, ediciones, mensaje }) {
@@ -51,14 +60,22 @@ export function ConciliacionProvider({ children }) {
       ediciones: state.proposal.ediciones,
       rondas: state.proposal.rondas,
     }
-    persist({ proposal: null, historial: [cerrada, ...state.historial] })
+    persist({
+      abierta: false,
+      tripIdsAbiertos: [],
+      proposal: null,
+      historial: [cerrada, ...state.historial],
+    })
   }
 
   return (
     <ConciliacionContext.Provider
       value={{
+        abierta: state.abierta,
+        tripIdsAbiertos: state.tripIdsAbiertos,
         proposal: state.proposal,
         historial: state.historial,
+        iniciarConciliacion,
         enviarPropuesta,
         aceptarPropuesta,
       }}
