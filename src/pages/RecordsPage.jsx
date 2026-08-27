@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { IconInbox, IconAlertTriangle } from '@tabler/icons-react'
+import { IconInbox, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { distanciaFacturable } from '../data/mockTarifas.js'
 
@@ -155,6 +155,7 @@ function RecordsPage() {
                 <th>Operador</th>
                 <th>Checador</th>
                 <th>Excepción</th>
+                <th>Conciliado</th>
               </tr>
             </thead>
             <tbody>
@@ -188,6 +189,16 @@ function RecordsPage() {
                       <span className="badge badge-warning" title={trip.justificacion}>
                         <IconAlertTriangle size={12} stroke={2} />
                         Distancia
+                      </span>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                  <td>
+                    {trip.conciliado ? (
+                      <span className="badge badge-success">
+                        <IconCheck size={12} stroke={2} />
+                        Conciliado
                       </span>
                     ) : (
                       '—'

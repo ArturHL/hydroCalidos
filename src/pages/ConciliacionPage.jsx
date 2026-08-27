@@ -175,14 +175,20 @@ function EnProceso() {
     useConciliacion()
 
   // Filtro de últimos 7 días: la conciliación semanal es un proceso
-  // obligatorio — incluye TODOS los viajes del periodo, tengan o no
-  // excepción, no solo los que traen algo raro.
+  // obligatorio — incluye TODOS los viajes del periodo sin conciliar
+  // todavía, tengan o no excepción, no solo los que traen algo raro. Un
+  // viaje que ya pasó por una conciliación aceptada (`conciliado: true`)
+  // no vuelve a aparecer aquí.
   const haceSieteDias = Date.now() - SIETE_DIAS_MS
-  const tripsUltimos7Dias = trips.filter((t) => t.timestamp && t.timestamp >= haceSieteDias)
-  const excepcionesUltimos7Dias = tripsUltimos7Dias.filter((t) => t.excepcion)
+  const tripsSinConciliarUltimos7Dias = trips.filter(
+    (t) => t.timestamp && t.timestamp >= haceSieteDias && !t.conciliado,
+  )
+  const excepcionesUltimos7Dias = tripsSinConciliarUltimos7Dias.filter((t) => t.excepcion)
 
   const tripsAbiertos = trips.filter((t) => tripIdsAbiertos.includes(t.id))
-  const nuevosTrips = abierta ? trips.filter((t) => !tripIdsAbiertos.includes(t.id)) : []
+  const nuevosTrips = abierta
+    ? trips.filter((t) => !tripIdsAbiertos.includes(t.id) && !t.conciliado)
+    : []
 
   const [ediciones, setEdiciones] = useState(() => buildInicial(tripsAbiertos))
   const [mensaje, setMensaje] = useState('')
@@ -195,15 +201,27 @@ function EnProceso() {
 
   // Paso 1: nadie ha "abierto" la conciliación todavía — es un paso
   // deliberado, no algo que se dispare solo por existir excepciones. El
-  // botón siempre está disponible: la conciliación semanal es obligatoria
-  // haya o no haya excepciones esta semana.
+  // botón está disponible mientras haya al menos un viaje sin conciliar
+  // (con o sin excepción) — la conciliación semanal es obligatoria, no
+  // depende de que existan excepciones. Si ya no queda nada pendiente, la
+  // opción de iniciarla desaparece por completo.
   if (!abierta) {
+    if (tripsSinConciliarUltimos7Dias.length === 0) {
+      return (
+        <div className="empty-state">
+          <IconCheck size={26} stroke={1.5} />
+          <p>No hay viajes pendientes de conciliar en los últimos 7 días.</p>
+        </div>
+      )
+    }
+
     return (
       <div className="empty-state">
         <IconClipboardCheck size={26} stroke={1.5} />
         <p>
-          {tripsUltimos7Dias.length} viaje{tripsUltimos7Dias.length === 1 ? '' : 's'} de los
-          últimos 7 días
+          {tripsSinConciliarUltimos7Dias.length} viaje
+          {tripsSinConciliarUltimos7Dias.length === 1 ? '' : 's'} sin conciliar de los últimos 7
+          días
           {excepcionesUltimos7Dias.length > 0
             ? ` (${excepcionesUltimos7Dias.length} con excepción)`
             : ' (ninguno con excepción)'}
@@ -217,7 +235,7 @@ function EnProceso() {
           type="button"
           className="btn-primary"
           whileTap={{ scale: 0.97 }}
-          onClick={() => iniciarConciliacion(tripsUltimos7Dias.map((t) => t.id))}
+          onClick={() => iniciarConciliacion(tripsSinConciliarUltimos7Dias.map((t) => t.id))}
         >
           <IconClipboardCheck size={16} stroke={2} />
           Iniciar conciliación semanal
@@ -339,7 +357,11 @@ function EnProceso() {
                 autor: role,
                 aplicarCambios: (edic) => {
                   Object.entries(edic).forEach(([tripId, edicion]) =>
-                    updateTrip(tripId, { distancia: edicion.distancia, excepcion: false }),
+                    updateTrip(tripId, {
+                      distancia: edicion.distancia,
+                      excepcion: false,
+                      conciliado: true,
+                    }),
                   )
                 },
               })

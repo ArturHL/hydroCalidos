@@ -35,6 +35,7 @@ function crearViaje({
   checador,
   representanteTransportista = '',
   excepcionResuelta = false,
+  conciliado = false,
 }) {
   const esperada = distanciaEsperada(origen, destino)
   const excepcion = !excepcionResuelta && esperada !== null && distanciaCapturada !== esperada
@@ -59,6 +60,7 @@ function crearViaje({
     coordSalida: '21.881306, -100.866196',
     coordLlegada: '21.900412, -100.901823',
     excepcion,
+    conciliado,
     costoEstimado: calcularCostoViaje({ material, distanciaKm: distanciaCapturada, volumenM3: volumen }),
   }
 }
@@ -130,6 +132,7 @@ export function cargarDatosDeEjemplo() {
     operador: 'Ismael Cordero',
     checador: 'Fernando Ibarra',
     excepcionResuelta: true,
+    conciliado: true,
   })
   const v10 = crearViaje({
     folio: 10,
@@ -143,6 +146,7 @@ export function cargarDatosDeEjemplo() {
     operador: 'Ismael Cordero',
     checador: 'Lucía Vargas',
     excepcionResuelta: true,
+    conciliado: true,
   })
 
   // ---- Semana actual, sin excepción — para Registros/Métricas
