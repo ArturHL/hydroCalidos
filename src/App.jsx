@@ -91,7 +91,6 @@ function App() {
         </nav>
 
         <div className="header-actions">
-          <SeedMenu />
           <label className="role-switch">
             Rol activo
             <select value={role} onChange={(e) => setRole(e.target.value)}>
@@ -102,6 +101,7 @@ function App() {
               ))}
             </select>
           </label>
+          <SeedMenu />
         </div>
       </header>
 
