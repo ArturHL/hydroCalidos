@@ -96,18 +96,29 @@ No se construyeron (evaluadas y descartadas para esta ronda, ver conversación q
 
 Botón discreto arriba a la derecha del header (ícono de base de datos, junto
 al selector de rol) — `src/components/SeedMenu.jsx` / `src/data/seedData.js`.
-"Cargar datos de ejemplo" puebla los 4 stores de localStorage con 12 viajes
-que cubren todos los escenarios ya construidos sin tener que capturarlos a
-mano antes de una demo: los 5 bancos, las 3 categorías de tarifa, un viaje de
-Movimiento Interno que demuestra el piso de facturación a 3 km, dos
-semanas distintas (para que Métricas tenga una comparativa real en vez de
-"sin referencia"), una excepción ya resuelta con su conciliación cerrada
-(exportable a Excel), una excepción pendiente lista para "Iniciar
-conciliación semanal" en vivo, y una revisión de contrato ya cerrada. Pensado
-para que en un pitch solo se capture UN viaje nuevo a mano (para mostrar el
-Formulario funcionando) y todo lo demás ya exista. "Borrar todos los datos"
-regresa todo a cero para volver a ensayar. Ninguno de los dos toca datos
-reales — solo localStorage del navegador.
+"Cargar datos de ejemplo" puebla los 4 stores de localStorage con **22
+viajes** repartidos en dos semanas, a propósito — una conciliación real no
+cubre solo un par de viajes de una semana a medias:
+
+- **Semana anterior, completa y ya conciliada** (folios 1-12, 8 a 14 días
+  atrás): los 12 viajes quedan marcados `conciliado: true` desde la
+  semilla, y respaldan **una sola conciliación cerrada que cubre los 12**
+  (no solo 2) — exportable a Excel desde Historial, con dos de ellos
+  (folios 7 y 11) llevando una excepción real ya resuelta durante la
+  negociación.
+- **Semana actual, en curso y sin conciliar** (folios 13-22, hoy a 6 días
+  atrás): ninguno lleva `conciliado`, así que los 10 aparecen como
+  pendientes en Conciliación — incluye los 5 bancos, un viaje de
+  Movimiento Interno (piso de facturación a 3 km) y una excepción
+  **pendiente** (folio 22, hoy) lista para "Iniciar conciliación semanal"
+  en vivo.
+
+Esto también le da a Métricas una comparativa real semana-contra-semana en
+vez de "sin referencia". Pensado para que en un pitch solo se capture UN
+viaje nuevo a mano (para mostrar el Formulario funcionando) y todo lo demás
+ya exista. "Borrar todos los datos" regresa todo a cero para volver a
+ensayar. Ninguno de los dos toca datos reales — solo localStorage del
+navegador.
 
 ## Convenciones a seguir
 
