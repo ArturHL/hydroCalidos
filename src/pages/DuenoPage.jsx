@@ -43,10 +43,14 @@ function DuenoPage() {
   const { trips } = useTrips()
   const { historial } = useConciliacion()
 
+  // Viajes "en tránsito" (Checador de salida ya los abrió, Checador destino
+  // todavía no) no tienen costo ni excepción todavía — no cuentan aquí.
+  const completados = trips.filter((t) => t.estado === 'completado')
+
   const resumen = {
-    totalViajes: trips.length,
-    costoAcumulado: trips.reduce((sum, t) => sum + costoDeViaje(t), 0),
-    excepcionesAbiertas: trips.filter((t) => t.excepcion).length,
+    totalViajes: completados.length,
+    costoAcumulado: completados.reduce((sum, t) => sum + costoDeViaje(t), 0),
+    excepcionesAbiertas: completados.filter((t) => t.excepcion).length,
     conciliacionesCerradas: historial.length,
   }
 

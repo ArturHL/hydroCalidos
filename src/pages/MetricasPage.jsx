@@ -80,7 +80,9 @@ const CATEGORIAS = ['Material', 'Carpeta Asfáltica', 'Roca']
 
 function MetricasPage() {
   const { trips } = useTrips()
-  const tripsConFecha = trips.filter((t) => t.timestamp)
+  // Viajes "en tránsito" no tienen distancia/costo todavía — solo cuentan
+  // los que el Checador destino ya completó.
+  const tripsConFecha = trips.filter((t) => t.timestamp && t.estado === 'completado')
 
   if (tripsConFecha.length === 0) {
     return (

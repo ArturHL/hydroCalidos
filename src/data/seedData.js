@@ -3,13 +3,15 @@ import { calcularCostoViaje, CLASES_TARIFARIAS } from './mockTarifas.js'
 
 // Datos de ejemplo para preparar un pitch: cubren los escenarios que
 // normalmente tomaría minutos generar a mano — una semana anterior completa
-// (12 viajes, ya conciliada en su totalidad, exportable a Excel) y la semana
+// (12 viajes, ya conciliada en su totalidad, exportable a Excel), la semana
 // actual en curso (10 viajes, ninguno conciliado todavía, con una excepción
-// pendiente lista para "Iniciar conciliación semanal" en vivo) — más una
-// revisión de contrato ya cerrada. Una conciliación real no cubre solo 2
-// viajes de una semana a medias; por eso la semana ya cerrada trae su lote
-// completo. La idea es que en el pitch solo se capture UN viaje nuevo en el
-// Formulario — todo lo demás ya existe.
+// pendiente lista para "Iniciar conciliación semanal" en vivo) y un viaje
+// EN TRÁNSITO (folio 23, ya abierto por el Checador de salida) listo para
+// que el Checador destino lo complete en vivo — más una revisión de
+// contrato ya cerrada. Una conciliación real no cubre solo 2 viajes de una
+// semana a medias; por eso la semana ya cerrada trae su lote completo. La
+// idea es que en el pitch solo se complete UN viaje a mano (folio 23,
+// Formulario de llegada) — todo lo demás ya existe.
 
 const TRIPS_KEY = 'volteo_trips'
 const CONCILIACION_KEY = 'volteo_conciliacion'
@@ -35,10 +37,23 @@ const OPERADORES_SEED = [
   { nombre: 'Nemesio Trujillo', placa: 'QYC-475', representante: 'Raúl Ponce', capacidad: '15' },
 ]
 
+// Dos Checadores de destino (los que ya existían, cierran el viaje al
+// llegar) y dos de salida (abren el viaje al cargar en el banco) — mismo
+// patrón de turno matutino/vespertino en ambos lados.
 const CHECADORES_SEED = [
-  { nombre: 'Lucía Vargas', obra: 'Tramo Km 50-66, turno matutino' },
-  { nombre: 'Fernando Ibarra', obra: 'Tramo Km 50-66, turno vespertino' },
+  { nombre: 'Lucía Vargas', obra: 'Tramo Km 50-66, turno matutino', tipo: 'destino' },
+  { nombre: 'Fernando Ibarra', obra: 'Tramo Km 50-66, turno vespertino', tipo: 'destino' },
+  { nombre: 'Rosaura Delgado', obra: 'Bancos de material, turno matutino', tipo: 'salida' },
+  { nombre: 'Norma Bracamontes', obra: 'Bancos de material, turno vespertino', tipo: 'salida' },
 ]
+
+// El Checador de salida que abrió cada viaje, derivado del Checador destino
+// que lo cerró (mismo turno matutino/vespertino a ambos lados) — evita
+// tener que anotarlo a mano en cada uno de los 22 viajes semilla.
+const SALIDA_POR_DESTINO = {
+  'Lucía Vargas': 'Rosaura Delgado',
+  'Fernando Ibarra': 'Norma Bracamontes',
+}
 
 function fechaEn(diasAtras, hora = 10) {
   const d = new Date()
@@ -57,7 +72,7 @@ function crearViaje({
   volumen,
   placa,
   operador,
-  checador,
+  checadorDestino,
   representanteTransportista = '',
   excepcionResuelta = false,
   conciliado = false,
@@ -70,6 +85,7 @@ function crearViaje({
     folio: `TCK-${String(folio).padStart(4, '0')}`,
     fecha: fechaObj.toLocaleDateString('es-MX'),
     timestamp: fechaObj.getTime(),
+    estado: 'completado',
     origen,
     material,
     destino,
@@ -80,7 +96,8 @@ function crearViaje({
     capacidad: String(Math.round(volumen)),
     volumen: String(volumen),
     operador,
-    checador,
+    checadorSalida: SALIDA_POR_DESTINO[checadorDestino] ?? '',
+    checadorDestino,
     representanteTransportista,
     coordSalida: '21.881306, -100.866196',
     coordLlegada: '21.900412, -100.901823',
@@ -119,7 +136,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.0,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -133,7 +150,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.2,
     placa: 'HLB-114',
     operador: 'Ismael Cordero',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     conciliado: true,
   })
   const s3 = crearViaje({
@@ -146,7 +163,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 14.5,
     placa: 'JKT-330',
     operador: 'Diego Salcido',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -160,7 +177,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 13.0,
     placa: 'MNP-772',
     operador: 'Rogelio Padilla',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     conciliado: true,
   })
   const s5 = crearViaje({
@@ -173,7 +190,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.0,
     placa: 'RTV-556',
     operador: 'Efraín Duarte',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     conciliado: true,
   })
   const s6 = crearViaje({
@@ -186,7 +203,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.5,
     placa: 'PXK-889',
     operador: 'Cirilo Bermúdez',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -202,7 +219,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.8,
     placa: 'LWQ-247',
     operador: 'Gilberto Reséndiz',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     excepcionResuelta: true,
     conciliado: true,
   })
@@ -216,7 +233,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 14.0,
     placa: 'DFN-903',
     operador: 'Norberto Ibáñez',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -230,7 +247,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 12.8,
     placa: 'ZBM-618',
     operador: 'Baltazar Cendejas',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     conciliado: true,
   })
   const s10 = crearViaje({
@@ -243,7 +260,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.3,
     placa: 'QYC-475',
     operador: 'Nemesio Trujillo',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -258,7 +275,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.5,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     excepcionResuelta: true,
     conciliado: true,
   })
@@ -272,7 +289,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.0,
     placa: 'HLB-114',
     operador: 'Ismael Cordero',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
   })
@@ -295,7 +312,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.4,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
   })
   const a2 = crearViaje({
@@ -308,7 +325,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.8,
     placa: 'HLB-114',
     operador: 'Ismael Cordero',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
   })
   const a3 = crearViaje({
     folio: 15,
@@ -320,7 +337,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 14.2,
     placa: 'JKT-330',
     operador: 'Diego Salcido',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
   })
   const a4 = crearViaje({
@@ -333,7 +350,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 17.0,
     placa: 'MNP-772',
     operador: 'Rogelio Padilla',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
   })
   const a5 = crearViaje({
     folio: 17,
@@ -345,7 +362,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 15.9,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
   })
   const a6 = crearViaje({
@@ -358,7 +375,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 16.1,
     placa: 'HLB-114',
     operador: 'Ismael Cordero',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
   })
   const a7 = crearViaje({
     folio: 19,
@@ -370,7 +387,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 13.6,
     placa: 'JKT-330',
     operador: 'Diego Salcido',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
   })
   const a8 = crearViaje({
@@ -383,7 +400,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 12.5,
     placa: 'MNP-772',
     operador: 'Rogelio Padilla',
-    checador: 'Fernando Ibarra',
+    checadorDestino: 'Fernando Ibarra',
   })
   // Movimiento Interno — viaje real dentro del mismo sitio (<1 km), para
   // demostrar el piso de facturación a 3 km en Registros/Métricas.
@@ -397,7 +414,7 @@ export function cargarDatosDeEjemplo() {
     volumen: 9.5,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
   })
   // Excepción PENDIENTE, sin resolver, de hoy — para demostrar en vivo
@@ -412,13 +429,36 @@ export function cargarDatosDeEjemplo() {
     volumen: 17.3,
     placa: 'GXA-201',
     operador: 'Martín Reyes',
-    checador: 'Lucía Vargas',
+    checadorDestino: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
   })
 
   const tripsSemanaActual = [a10, a9, a8, a7, a6, a5, a4, a3, a2, a1]
 
-  const trips = [...tripsSemanaActual, ...tripsSemanaAnterior]
+  // ================================================================
+  // EN TRÁNSITO — el Checador de salida ya lo registró hoy (folio 23),
+  // pendiente de que el Checador destino lo complete en vivo durante el
+  // pitch (flujo de dos pasos). No pasa por crearViaje(): todavía no tiene
+  // destino/distancia/costo, eso lo agrega completarLlegada() al cerrarlo.
+  // ================================================================
+  const salidaPendiente = {
+    id: crypto.randomUUID(),
+    folio: 'TCK-0023',
+    fecha: fechaEn(0).toLocaleDateString('es-MX'),
+    timestamp: fechaEn(0, 11).getTime(),
+    estado: 'en_transito',
+    origen: 'Banco Las Torres',
+    material: 'Terraplén',
+    placa: 'HLB-114',
+    capacidad: '16',
+    volumen: '16.4',
+    operador: 'Ismael Cordero',
+    representanteTransportista: 'Raúl Ponce',
+    checadorSalida: 'Norma Bracamontes',
+    coordSalida: '21.881306, -100.866196',
+  }
+
+  const trips = [salidaPendiente, ...tripsSemanaActual, ...tripsSemanaAnterior]
   localStorage.setItem(TRIPS_KEY, JSON.stringify(trips))
 
   // ---- Personal (RH): un Operador por placa usada arriba, más los dos

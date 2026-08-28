@@ -6,8 +6,13 @@ import AnimatedTabs from '../components/AnimatedTabs.jsx'
 
 const EASE = [0.16, 1, 0.3, 1]
 
-const EMPTY_CHECADOR = { nombre: '', obra: '' }
+const EMPTY_CHECADOR = { nombre: '', obra: '', tipo: '' }
 const EMPTY_OPERADOR = { nombre: '', placa: '', representante: '', capacidad: '' }
+
+const TIPO_CHECADOR_LABEL = {
+  salida: 'Checador salida',
+  destino: 'Checador destino',
+}
 
 function ChecadoresTab() {
   const { checadores, addChecador, removeChecador } = usePersonal()
@@ -21,8 +26,8 @@ function ChecadoresTab() {
 
   function handleSubmit(event) {
     event.preventDefault()
-    if (!form.nombre.trim() || !form.obra.trim()) {
-      setError('Completa nombre y lugar de trabajo/obra.')
+    if (!form.nombre.trim() || !form.obra.trim() || !form.tipo) {
+      setError('Completa nombre, lugar de trabajo/obra y tipo.')
       return
     }
     addChecador(form)
@@ -54,6 +59,15 @@ function ChecadoresTab() {
               placeholder="Ej. Tramo Km 50-66, turno matutino"
             />
           </label>
+
+          <label>
+            Tipo
+            <select value={form.tipo} onChange={(e) => updateField('tipo', e.target.value)}>
+              <option value="">Selecciona un tipo</option>
+              <option value="salida">Checador salida</option>
+              <option value="destino">Checador destino</option>
+            </select>
+          </label>
         </div>
 
         {error && <p className="field-error">{error}</p>}
@@ -77,6 +91,7 @@ function ChecadoresTab() {
               <tr>
                 <th>Nombre</th>
                 <th>Lugar de trabajo / obra</th>
+                <th>Tipo</th>
                 <th></th>
               </tr>
             </thead>
@@ -90,6 +105,9 @@ function ChecadoresTab() {
                 >
                   <td style={{ fontFamily: 'var(--font-sans)' }}>{c.nombre}</td>
                   <td style={{ fontFamily: 'var(--font-sans)' }}>{c.obra}</td>
+                  <td style={{ fontFamily: 'var(--font-sans)' }}>
+                    {TIPO_CHECADOR_LABEL[c.tipo] ?? '—'}
+                  </td>
                   <td>
                     <button
                       type="button"

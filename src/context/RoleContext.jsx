@@ -1,7 +1,8 @@
 import { createContext, useContext, useState } from 'react'
 
 export const ROLES = [
-  { id: 'checador', label: 'Checador' },
+  { id: 'checador_salida', label: 'Checador salida' },
+  { id: 'checador_destino', label: 'Checador destino' },
   { id: 'contador_constructora', label: 'Contador (Constructora)' },
   { id: 'contador_transportista', label: 'Contador (Transportista)' },
   { id: 'dueno', label: 'Dueño / Representante' },
@@ -12,9 +13,17 @@ const RoleContext = createContext(null)
 
 const STORAGE_KEY = 'volteo_role'
 
+// El rol único 'checador' (Formulario de un solo paso) se dividió en
+// 'checador_salida'/'checador_destino' — un valor viejo en localStorage de
+// antes de ese cambio se reasigna a 'checador_destino' (el que ya existía,
+// el nuevo 'checador_salida' amplía el flujo).
+function migrarRol(role) {
+  return role === 'checador' ? 'checador_destino' : role
+}
+
 export function RoleProvider({ children }) {
   const [role, setRole] = useState(
-    () => localStorage.getItem(STORAGE_KEY) || ROLES[0].id,
+    () => migrarRol(localStorage.getItem(STORAGE_KEY)) || ROLES[0].id,
   )
 
   function updateRole(nextRole) {

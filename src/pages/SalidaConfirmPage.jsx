@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { IconAlertTriangle, IconPlus, IconPrinter } from '@tabler/icons-react'
+import { IconClockHour4, IconPlus } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -10,26 +10,23 @@ const FIELD_LABELS = {
   fecha: 'Fecha',
   origen: 'Origen',
   material: 'Material',
-  destino: 'Destino',
-  distancia: 'Distancia (km)',
   placa: 'Placa',
-  capacidad: 'Capacidad nominal del camión (m³)',
-  volumen: 'Volumen real transportado (m³)',
   operador: 'Operador',
   checadorSalida: 'Checador de salida',
-  checadorDestino: 'Checador de destino',
   representanteTransportista: 'Representante del Transportista',
   coordSalida: 'Coordenadas de salida',
-  coordLlegada: 'Coordenadas de llegada',
 }
 
-function TicketPage() {
+// Confirmación del paso 1 (Checador salida) — no es el Ticket (eso solo
+// existe una vez que el Checador destino completa la llegada, ver
+// TicketPage.jsx). Sin costo, sin impresión: nada cambia de manos todavía.
+function SalidaConfirmPage() {
   const { id } = useParams()
   const { trips } = useTrips()
   const trip = trips.find((t) => t.id === id)
 
   if (!trip) {
-    return <Navigate to="/formulario" replace />
+    return <Navigate to="/formulario-salida" replace />
   }
 
   return (
@@ -39,17 +36,12 @@ function TicketPage() {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.28, ease: EASE }}
     >
-      <h1>Ticket generado</h1>
+      <h1>Salida registrada</h1>
 
-      {trip.excepcion && (
-        <p className="field-hint">
-          <span className="badge badge-warning">
-            <IconAlertTriangle size={13} stroke={2} />
-            Excepción de distancia
-          </span>{' '}
-          Este viaje quedó marcado con excepción por distancia fuera de lo esperado.
-        </p>
-      )}
+      <p className="field-hint">
+        <IconClockHour4 size={13} stroke={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+        En tránsito — el Checador de destino lo completará al llegar y ahí se genera el Ticket.
+      </p>
 
       <dl className="ticket-summary">
         {Object.entries(FIELD_LABELS)
@@ -63,22 +55,13 @@ function TicketPage() {
       </dl>
 
       <div className="ticket-actions no-print">
-        <motion.button
-          type="button"
-          className="btn-secondary"
-          whileTap={{ scale: 0.97 }}
-          onClick={() => window.print()}
-        >
-          <IconPrinter size={16} stroke={2} />
-          Imprimir
-        </motion.button>
-        <Link to="/formulario" className="btn-primary">
+        <Link to="/formulario-salida" className="btn-primary">
           <IconPlus size={16} stroke={2} />
-          Registrar otro viaje
+          Registrar otra salida
         </Link>
       </div>
     </motion.section>
   )
 }
 
-export default TicketPage
+export default SalidaConfirmPage

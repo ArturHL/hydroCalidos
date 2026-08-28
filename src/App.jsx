@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   IconArrowsExchange,
+  IconArrowUpRight,
   IconChartBar,
   IconEye,
   IconFileDollar,
@@ -12,6 +13,8 @@ import {
 } from '@tabler/icons-react'
 import { ROLES, useRole } from './context/RoleContext.jsx'
 import SeedMenu from './components/SeedMenu.jsx'
+import FormSalidaPage from './pages/FormSalidaPage'
+import SalidaConfirmPage from './pages/SalidaConfirmPage'
 import FormPage from './pages/FormPage'
 import TicketPage from './pages/TicketPage'
 import RecordsPage from './pages/RecordsPage'
@@ -25,7 +28,10 @@ import './App.css'
 const EASE = [0.16, 1, 0.3, 1]
 
 const NAV_BY_ROLE = {
-  checador: [{ to: '/formulario', label: 'Formulario', icon: IconFileText }],
+  checador_salida: [
+    { to: '/formulario-salida', label: 'Formulario de salida', icon: IconArrowUpRight },
+  ],
+  checador_destino: [{ to: '/formulario', label: 'Formulario de llegada', icon: IconFileText }],
   contador_constructora: [
     { to: '/registros', label: 'Registros', icon: IconTable },
     { to: '/conciliacion', label: 'Conciliación', icon: IconArrowsExchange },
@@ -43,7 +49,8 @@ const NAV_BY_ROLE = {
 }
 
 const RUTA_INICIAL_POR_ROL = {
-  checador: '/formulario',
+  checador_salida: '/formulario-salida',
+  checador_destino: '/formulario',
   dueno: '/panel-dueno',
   rh: '/rh',
 }
@@ -67,6 +74,8 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<IndexRedirect />} />
+          <Route path="/formulario-salida" element={<FormSalidaPage />} />
+          <Route path="/salida/:id" element={<SalidaConfirmPage />} />
           <Route path="/formulario" element={<FormPage />} />
           <Route path="/ticket/:id" element={<TicketPage />} />
           <Route path="/registros" element={<RecordsPage />} />

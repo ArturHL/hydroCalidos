@@ -21,11 +21,12 @@ export function PersonalProvider({ children }) {
   const [checadores, setChecadores] = useState(() => loadFrom(CHECADORES_KEY))
   const [operadores, setOperadores] = useState(() => loadFrom(OPERADORES_KEY))
 
-  function addChecador({ nombre, obra }) {
+  function addChecador({ nombre, obra, tipo }) {
     const checador = {
       id: crypto.randomUUID(),
       nombre: nombre.trim(),
       obra: obra.trim(),
+      tipo, // 'salida' | 'destino'
     }
     const next = [...checadores, checador]
     setChecadores(next)

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { IconInbox, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
+import { IconInbox, IconAlertTriangle, IconCheck, IconClockHour4 } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { distanciaFacturable } from '../data/mockTarifas.js'
 
@@ -153,7 +153,9 @@ function RecordsPage() {
                 <th>Costo est.</th>
                 <th>Placa</th>
                 <th>Operador</th>
-                <th>Checador</th>
+                <th>Checador salida</th>
+                <th>Checador destino</th>
+                <th>Estado</th>
                 <th>Excepción</th>
                 <th>Conciliado</th>
               </tr>
@@ -170,9 +172,9 @@ function RecordsPage() {
                   <td>{trip.fecha}</td>
                   <td>{trip.origen}</td>
                   <td>{trip.material}</td>
-                  <td>{trip.destino}</td>
+                  <td>{trip.destino ?? '—'}</td>
                   <td>
-                    {trip.distancia} km
+                    {trip.distancia != null ? `${trip.distancia} km` : '—'}
                     {distanciaFacturable(trip.distancia) > Number(trip.distancia) && (
                       <span className="field-hint" style={{ display: 'block' }}>
                         mín. 3 km
@@ -183,7 +185,21 @@ function RecordsPage() {
                   <td>{trip.costoEstimado != null ? `$${trip.costoEstimado.toLocaleString('es-MX')}` : '—'}</td>
                   <td>{trip.placa}</td>
                   <td>{trip.operador}</td>
-                  <td>{trip.checador}</td>
+                  <td>{trip.checadorSalida ?? '—'}</td>
+                  <td>{trip.checadorDestino ?? '—'}</td>
+                  <td>
+                    {trip.estado === 'completado' ? (
+                      <span className="badge badge-success">
+                        <IconCheck size={12} stroke={2} />
+                        Completado
+                      </span>
+                    ) : (
+                      <span className="badge badge-neutral">
+                        <IconClockHour4 size={12} stroke={2} />
+                        En tránsito
+                      </span>
+                    )}
+                  </td>
                   <td>
                     {trip.excepcion ? (
                       <span className="badge badge-warning" title={trip.justificacion}>

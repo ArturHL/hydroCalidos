@@ -60,7 +60,7 @@ function filaDeViaje(trip, indice) {
     desglose?.kmSubsecuentes ?? '',
     desglose?.total ?? trip.costoEstimado ?? '',
     trip.origen ?? '',
-    trip.checador ?? '',
+    trip.checadorDestino ?? '',
   ]
 }
 

@@ -35,7 +35,7 @@ const COLUMNAS_VIAJE = [
   },
   { key: 'placa', label: 'Placa' },
   { key: 'operador', label: 'Operador' },
-  { key: 'checador', label: 'Checador' },
+  { key: 'checadorDestino', label: 'Checador destino' },
   {
     key: 'excepcion',
     label: 'Excepción',
@@ -180,14 +180,19 @@ function EnProceso() {
   // viaje que ya pasó por una conciliación aceptada (`conciliado: true`)
   // no vuelve a aparecer aquí.
   const haceSieteDias = Date.now() - SIETE_DIAS_MS
+  // Un viaje todavía "en tránsito" (el Checador destino no lo ha completado)
+  // no tiene distancia/costo todavía — no puede entrar a conciliación.
   const tripsSinConciliarUltimos7Dias = trips.filter(
-    (t) => t.timestamp && t.timestamp >= haceSieteDias && !t.conciliado,
+    (t) =>
+      t.estado === 'completado' && t.timestamp && t.timestamp >= haceSieteDias && !t.conciliado,
   )
   const excepcionesUltimos7Dias = tripsSinConciliarUltimos7Dias.filter((t) => t.excepcion)
 
   const tripsAbiertos = trips.filter((t) => tripIdsAbiertos.includes(t.id))
   const nuevosTrips = abierta
-    ? trips.filter((t) => !tripIdsAbiertos.includes(t.id) && !t.conciliado)
+    ? trips.filter(
+        (t) => t.estado === 'completado' && !tripIdsAbiertos.includes(t.id) && !t.conciliado,
+      )
     : []
 
   const [ediciones, setEdiciones] = useState(() => buildInicial(tripsAbiertos))
