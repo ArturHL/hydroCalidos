@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IconTicket } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
+import { usePersonal } from '../context/PersonalContext.jsx'
 import {
   BANCOS,
   DESTINOS,
@@ -10,8 +11,6 @@ import {
   materialesPorBanco,
 } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
-import { PLACAS_AUTORIZADAS } from '../data/mockCamiones.js'
-import { OPERADORES_AUTORIZADOS, representanteDeOperador } from '../data/mockOperadores.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -38,6 +37,7 @@ const EMPTY_FORM = {
 function FormPage() {
   const navigate = useNavigate()
   const { addTrip } = useTrips()
+  const { operadores, operadorPorPlaca } = usePersonal()
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
 
@@ -73,10 +73,16 @@ function FormPage() {
         next.justificacion = ''
       }
 
-      if (field === 'operador') {
-        // Cada Operador tiene un Representante del Transportista asignado —
-        // se autocompleta, aunque el campo se puede seguir editando a mano.
-        next.representanteTransportista = representanteDeOperador(value)
+      if (field === 'placa') {
+        // Cada camión está asignado a un solo Operador (RH lo da de alta) —
+        // elegir la placa autocompleta Nombre del operador, Capacidad y
+        // Representante. Capacidad y Representante se pueden seguir
+        // editando a mano; el nombre del operador no, porque va ligado al
+        // camión seleccionado.
+        const operador = operadorPorPlaca(value)
+        next.operador = operador?.nombre ?? ''
+        next.capacidad = operador?.capacidad ?? ''
+        next.representanteTransportista = operador?.representante ?? ''
       }
 
       return next
@@ -228,11 +234,16 @@ function FormPage() {
               name="placa"
               value={form.placa}
               onChange={(e) => updateField('placa', e.target.value)}
+              disabled={operadores.length === 0}
             >
-              <option value="">Selecciona un camión autorizado</option>
-              {PLACAS_AUTORIZADAS.map((placa) => (
-                <option key={placa} value={placa}>
-                  {placa}
+              <option value="">
+                {operadores.length === 0
+                  ? 'No hay operadores registrados — pide a RH dar de alta uno'
+                  : 'Selecciona un camión autorizado'}
+              </option>
+              {operadores.map((o) => (
+                <option key={o.id} value={o.placa}>
+                  {o.placa}
                 </option>
               ))}
             </select>
@@ -250,8 +261,8 @@ function FormPage() {
             />
           </label>
           <p className="field-hint">
-            Referencia del camión — no es lo que se cobra. Lo que se factura es el volumen real de
-            este viaje, abajo.
+            Autocompletada al elegir la placa — referencia del camión, no es lo que se cobra. Lo
+            que se factura es el volumen real de este viaje, abajo.
           </p>
 
           <label>
@@ -272,19 +283,9 @@ function FormPage() {
 
           <label>
             Nombre del operador
-            <select
-              name="operador"
-              value={form.operador}
-              onChange={(e) => updateField('operador', e.target.value)}
-            >
-              <option value="">Selecciona un operador autorizado</option>
-              {OPERADORES_AUTORIZADOS.map((operador) => (
-                <option key={operador} value={operador}>
-                  {operador}
-                </option>
-              ))}
-            </select>
+            <input type="text" name="operador" value={form.operador} readOnly />
           </label>
+          <p className="field-hint">Autocompletado al elegir la placa del camión, arriba.</p>
 
           <label>
             Nombre del checador

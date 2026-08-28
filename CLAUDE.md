@@ -23,7 +23,7 @@ Documento de levantamiento de requerimientos original: lo compartió el usuario 
 
 - Vite + React 19 (JavaScript, sin TypeScript), `react-router-dom` para las rutas.
 - Sin backend: todo el estado vive en React Context y se persiste en `localStorage` (así el demo sobrevive a un refresh).
-- Sin autenticación real: hay un **selector de rol** manual en el header (`Checador` / `Contador (Constructora)` / `Contador (Transportista)` / `Dueño / Representante`) que decide qué navegación y acciones ve cada quien.
+- Sin autenticación real: hay un **selector de rol** manual en el header (`Checador` / `Contador (Constructora)` / `Contador (Transportista)` / `Dueño / Representante` / `RH`) que decide qué navegación y acciones ve cada quien.
 - Simplificación deliberada para este MVP/demo: **una sola relación** Constructora ↔ Transportista (sin catálogo multi-empresa todavía).
 - **Sistema de diseño** (`src/index.css`/`src/App.css`, sin librería de componentes): tema claro único, sin dark mode — es una decisión de producto. Tipografía IBM Plex (Serif para títulos, Sans para UI, Mono para todo dato numérico/folio/costo). Acento tinta-azul de plano topográfico (`--accent`), no azul/morado genérico de SaaS. Profundidad vía sombras suaves por capas en superficies elevadas; bordes solo para separación estructural. Animación con `framer-motion` (transiciones de página, tabs con indicador deslizante, números animados en Métricas) e íconos con `@tabler/icons-react`. La firma del sistema es el `TurnoIndicator` (`src/components/`) — la negociación se visualiza como una ruta entre dos puntos, eco del propio dominio banco→destino. Detalle completo del proceso de diseño en la conversación que originó este cambio; si se retoma, usar la skill `interface-design` y ofrecer guardar `.interface-design/system.md`.
 
@@ -36,6 +36,7 @@ src/
     TripsContext.jsx       viajes/tickets capturados (volteo_trips)
     ConciliacionContext.jsx  negociación semanal de excepciones (volteo_conciliacion)
     ContratoContext.jsx    negociación de tarifas del contrato (volteo_contrato)
+    PersonalContext.jsx    Checadores/Operadores dados de alta por RH (volteo_checadores, volteo_operadores)
   data/
     mockContract.js        bancos → materiales permitidos, distancias esperadas por ruta (banco-destino)
     mockTarifas.js         tarifas por clase de material (Piedra vs. resto)
@@ -47,20 +48,22 @@ src/
     ContratoPage.jsx       Contrato actual + revisión (Contador)
     MetricasPage.jsx       Placeholder, pendiente de construir
     DuenoPage.jsx          Panel del Dueño/Representante — solo lectura
+    RHPage.jsx              Alta de Checadores y Operadores (rol RH)
   App.jsx                  Header, selector de rol, navegación condicional por rol, rutas
 ```
 
 ## Qué ya funciona
 
-1. **Formulario** (`/formulario`, rol Checador): Origen (banco) → filtra Material disponible → Destino → Distancia (se autosugiere según la ruta; si el checador la cambia, exige una justificación de texto para poder enviar). Placa es un catálogo cerrado de camiones autorizados por la región (`src/data/mockCamiones.js`, `PLACAS_AUTORIZADAS`) — no texto libre, para que no se pueda capturar una placa no autorizada ni un error de dedo. Capacidad nominal acepta decimales (`step="0.1"`). Operador es también un catálogo cerrado (`src/data/mockOperadores.js`, `OPERADORES_AUTORIZADOS`, mismo patrón que Placa) — al elegirlo, autocompleta el Representante del Transportista asignado (`representanteDeOperador()`, cada Operador tiene uno fijo; el campo se puede seguir editando a mano después). Checador **no es editable** — simula que el Checador ya inició sesión con su propio usuario (`CHECADOR_ACTUAL` fijo en `FormPage.jsx`, input `readOnly`). El costo estimado del viaje **no se muestra en el Formulario ni en el Ticket** (el Checador no debe ver montos en ningún punto de su flujo — sí se sigue calculando y guardando en el viaje, para Registros/Métricas/Conciliación, que son pantallas de Contador). Coordenadas de salida/llegada son texto libre. Al enviar, genera un ticket con folio autogenerado y navega a `/ticket/:id`.
+1. **Formulario** (`/formulario`, rol Checador): Origen (banco) → filtra Material disponible → Destino → Distancia (se autosugiere según la ruta; si el checador la cambia, exige una justificación de texto para poder enviar). Placa es un catálogo cerrado sacado de los Operadores que RH dio de alta (`PersonalContext`, ya no un mock estático) — no texto libre, para que no se pueda capturar una placa no autorizada ni un error de dedo. Elegir la placa **autocompleta Nombre del operador (solo lectura — va ligado 1:1 al camión, el Checador no lo puede cambiar), Capacidad nominal y Representante del Transportista** (estos dos últimos se pueden seguir editando a mano después). Checador **no es editable** — simula que el Checador ya inició sesión con su propio usuario (`CHECADOR_ACTUAL` fijo en `FormPage.jsx`, input `readOnly`). El costo estimado del viaje **no se muestra en el Formulario ni en el Ticket** (el Checador no debe ver montos en ningún punto de su flujo — sí se sigue calculando y guardando en el viaje, para Registros/Métricas/Conciliación, que son pantallas de Contador). Coordenadas de salida/llegada son texto libre. Al enviar, genera un ticket con folio autogenerado y navega a `/ticket/:id`.
 2. **Ticket generado** (`/ticket/:id`): resumen de datos (sin costo) + botón Imprimir (`window.print()`, básico, sin diseño de impresión elaborado) + volver a capturar otro viaje.
 3. **Registros** (`/registros`, rol Contador): tabla de todos los viajes capturados, con badge de "Excepción" cuando la distancia no coincidió con la esperada.
 4. **Conciliación** (`/conciliacion`, rol Contador): tab "En proceso" — el botón "Iniciar conciliación semanal" está disponible mientras haya al menos un viaje **sin conciliar** en los últimos 7 días (filtro por `timestamp`, con o sin excepción — es un proceso obligatorio, no depende de que existan excepciones). Al aceptar una conciliación, cada viaje incluido queda marcado `conciliado: true` (`TripsContext`) — un viaje ya conciliado no vuelve a aparecer en una conciliación futura, y **si no queda ningún viaje pendiente, la opción de iniciar conciliación desaparece por completo** (empty-state distinto, sin botón). Registros (`/registros`) tiene una columna "Conciliado" para verlo de un vistazo. La tabla de revisión muestra columna de Excepción y la **justificación íntegra que escribió el Checador** al capturar el viaje (antes solo vivía como tooltip en Registros). Turno alterna entre las dos partes; aceptar aplica los cambios a cada viaje, limpia su excepción y lo marca conciliado. Tab "Historial" (conciliaciones cerradas con el rastro completo de rondas; "Descargar Excel" exporta **todos los viajes que estuvieron en esa conciliación**, no solo los que tuvieron un ajuste — `ediciones` se siembra con todos los viajes del periodo desde que se abre, no solo las excepciones).
 5. **Contrato actual** (`/contrato`, rol Contador): mismo patrón de negociación que Conciliación pero sobre las tarifas (5 bandas de distancia × 3 categorías de material — ver más abajo). Tab "Acuerdo actual" (tabla vigente + Solicitar revisión) y tab "Historial". También lista el catálogo de bancos/materiales como referencia de solo lectura.
 6. **Métricas** (`/metricas`, rol Contador): KPIs de la semana actual vs. la anterior (viajes, km, volumen transportado, costo), desglose de costo por categoría de material, todo calculado con `calcularCostoViaje`. Sin combustible/diésel, como se pidió.
 7. **Panel del Dueño** (`/panel-dueno`, rol Dueño/Representante): KPIs de solo lectura (viajes totales, costo acumulado, excepciones abiertas, conciliaciones cerradas) + historial de conciliaciones. Cero botones de edición/negociación — el rol confirmado por el socio ("Duenos y representantes... sin acceso a modificar datos, solo verlos", `docs/business/CUESTIONARIO_SOCIO.md` §0 en Volteo). Verificado con Puppeteer headless que no aparece ningún botón de guardar/enviar/proponer/aceptar/descargar en esta pantalla.
+8. **RH** (`/rh`, rol RH): alta de Checadores (nombre + lugar de trabajo/obra) y Operadores (nombre + placa + Representante del Transportista asignado + capacidad del camión), persistidos en `PersonalContext`/`localStorage` (`volteo_checadores`, `volteo_operadores`). Reemplaza los catálogos estáticos `mockCamiones.js`/`mockOperadores.js` (eliminados) — ahora Placa/Operador en el Formulario salen de perfiles reales dados de alta aquí, no de un mock hardcodeado. RH no puede dar de alta dos Operadores con la misma placa (`placaEnUso()`, error en pantalla si se intenta) — es la llave que usa el Formulario para el autocompletado. Tabs "Checadores"/"Operadores", cada uno con su formulario de alta + tabla con botón de eliminar por fila.
 
-Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada.
+Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada. El flujo de RH (alta de Checador/Operador, rechazo de placa duplicada, autocompletado de Nombre/Capacidad/Representante al elegir placa en el Formulario, y que eliminar un Operador desde RH lo quita del select de Placa) también se probó end-to-end con Puppeteer (18/18 checks).
 
 ## Métricas: ya no es un placeholder
 
@@ -96,9 +99,15 @@ No se construyeron (evaluadas y descartadas para esta ronda, ver conversación q
 
 Botón discreto arriba a la derecha del header (ícono de base de datos, junto
 al selector de rol) — `src/components/SeedMenu.jsx` / `src/data/seedData.js`.
-"Cargar datos de ejemplo" puebla los 4 stores de localStorage con **22
+"Cargar datos de ejemplo" puebla los 6 stores de localStorage con **22
 viajes** repartidos en dos semanas, a propósito — una conciliación real no
-cubre solo un par de viajes de una semana a medias:
+cubre solo un par de viajes de una semana a medias — más **10 Operadores**
+(uno por cada placa usada en los viajes semilla, cada uno con su propia
+capacidad y el mismo Representante `Raúl Ponce`) y **2 Checadores**
+(`Lucía Vargas`, `Fernando Ibarra`, cada uno con su obra/turno) en
+`PersonalContext`, para que el Formulario tenga de inmediato con qué
+autocompletar sin que quien presente el pitch tenga que dar de alta nada a
+mano primero:
 
 - **Semana anterior, completa y ya conciliada** (folios 1-12, 8 a 14 días
   atrás): los 12 viajes quedan marcados `conciliado: true` desde la

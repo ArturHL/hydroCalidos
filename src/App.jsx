@@ -8,6 +8,7 @@ import {
   IconFileText,
   IconRoute,
   IconTable,
+  IconUsersGroup,
 } from '@tabler/icons-react'
 import { ROLES, useRole } from './context/RoleContext.jsx'
 import SeedMenu from './components/SeedMenu.jsx'
@@ -18,6 +19,7 @@ import ConciliacionPage from './pages/ConciliacionPage'
 import ContratoPage from './pages/ContratoPage'
 import MetricasPage from './pages/MetricasPage'
 import DuenoPage from './pages/DuenoPage'
+import RHPage from './pages/RHPage'
 import './App.css'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -37,11 +39,13 @@ const NAV_BY_ROLE = {
     { to: '/metricas', label: 'Métricas', icon: IconChartBar },
   ],
   dueno: [{ to: '/panel-dueno', label: 'Panel del Dueño', icon: IconEye }],
+  rh: [{ to: '/rh', label: 'RH', icon: IconUsersGroup }],
 }
 
 const RUTA_INICIAL_POR_ROL = {
   checador: '/formulario',
   dueno: '/panel-dueno',
+  rh: '/rh',
 }
 
 function IndexRedirect() {
@@ -70,6 +74,7 @@ function AnimatedRoutes() {
           <Route path="/contrato" element={<ContratoPage />} />
           <Route path="/metricas" element={<MetricasPage />} />
           <Route path="/panel-dueno" element={<DuenoPage />} />
+          <Route path="/rh" element={<RHPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

@@ -15,6 +15,30 @@ const TRIPS_KEY = 'volteo_trips'
 const CONCILIACION_KEY = 'volteo_conciliacion'
 const CONTRATO_KEY = 'volteo_contrato'
 const ROLE_KEY = 'volteo_role'
+const CHECADORES_KEY = 'volteo_checadores'
+const OPERADORES_KEY = 'volteo_operadores'
+
+// Perfiles de RH — cada camión (placa) está asignado a un solo Operador,
+// como exige el Formulario para autocompletar Nombre/Capacidad/Representante
+// al elegir la placa. Un mismo Representante del Transportista ('Raúl
+// Ponce') cubre a los 10, igual que en el catálogo estático que reemplazan.
+const OPERADORES_SEED = [
+  { nombre: 'Martín Reyes', placa: 'GXA-201', representante: 'Raúl Ponce', capacidad: '16' },
+  { nombre: 'Ismael Cordero', placa: 'HLB-114', representante: 'Raúl Ponce', capacidad: '16' },
+  { nombre: 'Diego Salcido', placa: 'JKT-330', representante: 'Raúl Ponce', capacidad: '14' },
+  { nombre: 'Rogelio Padilla', placa: 'MNP-772', representante: 'Raúl Ponce', capacidad: '13' },
+  { nombre: 'Efraín Duarte', placa: 'RTV-556', representante: 'Raúl Ponce', capacidad: '16' },
+  { nombre: 'Cirilo Bermúdez', placa: 'PXK-889', representante: 'Raúl Ponce', capacidad: '15' },
+  { nombre: 'Gilberto Reséndiz', placa: 'LWQ-247', representante: 'Raúl Ponce', capacidad: '17' },
+  { nombre: 'Norberto Ibáñez', placa: 'DFN-903', representante: 'Raúl Ponce', capacidad: '14' },
+  { nombre: 'Baltazar Cendejas', placa: 'ZBM-618', representante: 'Raúl Ponce', capacidad: '13' },
+  { nombre: 'Nemesio Trujillo', placa: 'QYC-475', representante: 'Raúl Ponce', capacidad: '15' },
+]
+
+const CHECADORES_SEED = [
+  { nombre: 'Lucía Vargas', obra: 'Tramo Km 50-66, turno matutino' },
+  { nombre: 'Fernando Ibarra', obra: 'Tramo Km 50-66, turno vespertino' },
+]
 
 function fechaEn(diasAtras, hora = 10) {
   const d = new Date()
@@ -135,7 +159,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 4,
     volumen: 13.0,
     placa: 'MNP-772',
-    operador: 'Diego Salcido',
+    operador: 'Rogelio Padilla',
     checador: 'Fernando Ibarra',
     conciliado: true,
   })
@@ -148,7 +172,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 3,
     volumen: 16.0,
     placa: 'RTV-556',
-    operador: 'Ismael Cordero',
+    operador: 'Efraín Duarte',
     checador: 'Lucía Vargas',
     conciliado: true,
   })
@@ -161,7 +185,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 6,
     volumen: 15.5,
     placa: 'PXK-889',
-    operador: 'Martín Reyes',
+    operador: 'Cirilo Bermúdez',
     checador: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
@@ -177,7 +201,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 6,
     volumen: 16.8,
     placa: 'LWQ-247',
-    operador: 'Ismael Cordero',
+    operador: 'Gilberto Reséndiz',
     checador: 'Fernando Ibarra',
     excepcionResuelta: true,
     conciliado: true,
@@ -191,7 +215,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 4,
     volumen: 14.0,
     placa: 'DFN-903',
-    operador: 'Diego Salcido',
+    operador: 'Norberto Ibáñez',
     checador: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
@@ -205,7 +229,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 5,
     volumen: 12.8,
     placa: 'ZBM-618',
-    operador: 'Martín Reyes',
+    operador: 'Baltazar Cendejas',
     checador: 'Lucía Vargas',
     conciliado: true,
   })
@@ -218,7 +242,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 4,
     volumen: 15.3,
     placa: 'QYC-475',
-    operador: 'Ismael Cordero',
+    operador: 'Nemesio Trujillo',
     checador: 'Lucía Vargas',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
@@ -247,7 +271,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 4,
     volumen: 15.0,
     placa: 'HLB-114',
-    operador: 'Diego Salcido',
+    operador: 'Ismael Cordero',
     checador: 'Fernando Ibarra',
     representanteTransportista: 'Raúl Ponce',
     conciliado: true,
@@ -308,7 +332,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 10,
     volumen: 17.0,
     placa: 'MNP-772',
-    operador: 'Ismael Cordero',
+    operador: 'Rogelio Padilla',
     checador: 'Fernando Ibarra',
   })
   const a5 = crearViaje({
@@ -358,7 +382,7 @@ export function cargarDatosDeEjemplo() {
     distanciaCapturada: 4,
     volumen: 12.5,
     placa: 'MNP-772',
-    operador: 'Diego Salcido',
+    operador: 'Rogelio Padilla',
     checador: 'Fernando Ibarra',
   })
   // Movimiento Interno — viaje real dentro del mismo sitio (<1 km), para
@@ -396,6 +420,19 @@ export function cargarDatosDeEjemplo() {
 
   const trips = [...tripsSemanaActual, ...tripsSemanaAnterior]
   localStorage.setItem(TRIPS_KEY, JSON.stringify(trips))
+
+  // ---- Personal (RH): un Operador por placa usada arriba, más los dos
+  // Checadores que aparecen en los viajes — así el Formulario puede
+  // autocompletar de inmediato sin que quien haga la demo tenga que dar de
+  // alta nada a mano primero.
+  localStorage.setItem(
+    OPERADORES_KEY,
+    JSON.stringify(OPERADORES_SEED.map((o) => ({ id: crypto.randomUUID(), ...o }))),
+  )
+  localStorage.setItem(
+    CHECADORES_KEY,
+    JSON.stringify(CHECADORES_SEED.map((c) => ({ id: crypto.randomUUID(), ...c }))),
+  )
 
   // ---- Conciliación ya cerrada — cubre los 12 viajes de la semana
   // anterior completa (no solo los 2 que tuvieron excepción), igual que
@@ -480,5 +517,7 @@ export function borrarDatosDeEjemplo() {
   localStorage.removeItem(CONCILIACION_KEY)
   localStorage.removeItem(CONTRATO_KEY)
   localStorage.removeItem(ROLE_KEY)
+  localStorage.removeItem(CHECADORES_KEY)
+  localStorage.removeItem(OPERADORES_KEY)
   window.location.reload()
 }

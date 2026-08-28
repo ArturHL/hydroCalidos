@@ -593,6 +593,28 @@ tbody tr:hover td {
   background: var(--paper);
 }
 
+/* Acción compacta dentro de una fila de tabla (RH: eliminar perfil) —
+   .btn-danger es demasiado grande para vivir dentro de una celda. */
+.icon-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--ink-300);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.icon-btn-danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
 /* ============================================================
    Badges de estado — evocan un sello de aprobación/observación
    ============================================================ */

@@ -40,7 +40,7 @@ function SeedMenu() {
                 setOpen(false)
                 if (
                   confirm(
-                    '¿Borrar todos los datos capturados (viajes, conciliaciones, contrato)? No se puede deshacer.',
+                    '¿Borrar todos los datos capturados (viajes, conciliaciones, contrato, personal de RH)? No se puede deshacer.',
                   )
                 ) {
                   borrarDatosDeEjemplo()
