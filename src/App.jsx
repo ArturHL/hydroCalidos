@@ -44,14 +44,22 @@ const NAV_BY_ROLE = {
     { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
     { to: '/metricas', label: 'Métricas', icon: IconChartBar },
   ],
-  dueno: [{ to: '/panel-dueno', label: 'Panel del Dueño', icon: IconEye }],
+  dueno_constructora: [
+    { to: '/panel-dueno', label: 'Panel del Dueño', icon: IconEye },
+    { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
+  ],
+  dueno_transportista: [
+    { to: '/panel-dueno', label: 'Panel del Dueño', icon: IconEye },
+    { to: '/contrato', label: 'Contrato actual', icon: IconFileDollar },
+  ],
   rh: [{ to: '/rh', label: 'RH', icon: IconUsersGroup }],
 }
 
 const RUTA_INICIAL_POR_ROL = {
   checador_salida: '/formulario-salida',
   checador_destino: '/formulario',
-  dueno: '/panel-dueno',
+  dueno_constructora: '/panel-dueno',
+  dueno_transportista: '/panel-dueno',
   rh: '/rh',
 }
 

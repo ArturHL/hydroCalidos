@@ -22,6 +22,11 @@ function loadState() {
 export function contraparte(role) {
   if (role === 'contador_constructora') return 'contador_transportista'
   if (role === 'contador_transportista') return 'contador_constructora'
+  // El par Dueño constructora/transportista negocia el Contrato
+  // (ContratoContext.jsx) con el mismo mecanismo de turno — Conciliación en
+  // sí sigue siendo cosa de Contadores, esto solo comparte la función.
+  if (role === 'dueno_constructora') return 'dueno_transportista'
+  if (role === 'dueno_transportista') return 'dueno_constructora'
   return null
 }
 

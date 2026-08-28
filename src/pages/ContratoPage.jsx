@@ -103,6 +103,11 @@ function AcuerdoActual() {
   const [mensaje, setMensaje] = useState('')
   const [confirmandoAceptar, setConfirmandoAceptar] = useState(false)
 
+  // Solo el Dueño/Representante crea y modifica el contrato — el Contador
+  // lo consulta (RF-1.4 en Volteo/docs/REQUIREMENTS.md). Por ahora, sin
+  // excepciones.
+  const puedeEditar = role === 'dueno_constructora' || role === 'dueno_transportista'
+
   if (!proposal) {
     return (
       <>
@@ -137,17 +142,24 @@ function AcuerdoActual() {
         ) : (
           <div className="form-stack">
             <TarifasTable tarifas={vigente} />
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={() => {
-                setTarifas(vigente)
-                setEditando(true)
-              }}
-            >
-              <IconEdit size={16} stroke={2} />
-              Solicitar revisión
-            </button>
+            {puedeEditar ? (
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  setTarifas(vigente)
+                  setEditando(true)
+                }}
+              >
+                <IconEdit size={16} stroke={2} />
+                Solicitar revisión
+              </button>
+            ) : (
+              <p className="field-hint">
+                Solo el Dueño/Representante de cada organización puede solicitar una revisión de
+                tarifas — por ahora, solo consulta.
+              </p>
+            )}
           </div>
         )}
 
@@ -180,9 +192,11 @@ function AcuerdoActual() {
     <>
       <TurnoIndicator turno={proposal.turno} />
       <p className="field-hint" style={{ marginTop: 4, marginBottom: 20 }}>
-        {esMiTurno
-          ? 'Es tu turno de responder esta solicitud de revisión.'
-          : `Esperando respuesta de ${ROLE_LABEL[proposal.turno]}.`}
+        {!puedeEditar
+          ? `Negociación en curso entre los Dueños de cada organización — puedes consultarla, no participar. Turno actual: ${ROLE_LABEL[proposal.turno]}.`
+          : esMiTurno
+            ? 'Es tu turno de responder esta solicitud de revisión.'
+            : `Esperando respuesta de ${ROLE_LABEL[proposal.turno]}.`}
       </p>
 
       <h2 style={{ marginTop: 0 }}>Tarifas propuestas</h2>

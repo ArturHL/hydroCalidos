@@ -548,14 +548,17 @@ export function cargarDatosDeEjemplo() {
     ]),
   )
 
+  // Solo el Dueño/Representante negocia el contrato (2026-08-28) — antes de
+  // ese cambio esta ronda semilla usaba los roles de Contador, que ya no
+  // pueden proponer/aceptar aquí, solo consultar.
   const contratoRonda1 = {
-    autor: 'contador_constructora',
+    autor: 'dueno_constructora',
     fecha: fechaEn(20, 11).toLocaleString('es-MX'),
     tarifas: tarifasPropuestas,
     mensaje: 'Propuesta inicial de tarifas para el subtramo.',
   }
   const contratoRonda2 = {
-    autor: 'contador_transportista',
+    autor: 'dueno_transportista',
     fecha: fechaEn(20, 15).toLocaleString('es-MX'),
     tarifas: CLASES_TARIFARIAS,
     mensaje: 'Contraoferta ajustada a costos reales de operación y mantenimiento.',
@@ -563,7 +566,7 @@ export function cargarDatosDeEjemplo() {
   const contratoCerrado = {
     id: crypto.randomUUID(),
     fechaCierre: fechaEn(20, 16).toLocaleString('es-MX'),
-    cerradoPor: 'contador_constructora',
+    cerradoPor: 'dueno_constructora',
     tarifas: CLASES_TARIFARIAS,
     rondas: [contratoRonda1, contratoRonda2],
   }
