@@ -63,6 +63,20 @@ const SALIDA_POR_BANCO = {
   'Banco Clemente': 'Concepción Rivas',
 }
 
+// SVG en línea como placeholder — el único viaje semilla que necesita
+// fotos es el pendiente (`salidaPendiente`, abajo): el Checador destino lo
+// completa en vivo durante el pitch, y ahí sí importa que la comparación
+// de fotos (salida vs. camión real) tenga algo que mostrar. Los 22 viajes
+// ya completados son historial, no se tocan.
+function fotoPlaceholder(texto) {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">` +
+    `<rect width="400" height="300" fill="#c9cdd3"/>` +
+    `<text x="200" y="150" font-family="sans-serif" font-size="18" fill="#4a4a4a" text-anchor="middle">${texto}</text>` +
+    `</svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
 function fechaEn(diasAtras, hora = 10) {
   const d = new Date()
   d.setDate(d.getDate() - diasAtras)
@@ -464,6 +478,8 @@ export function cargarDatosDeEjemplo() {
     representanteTransportista: 'Raúl Ponce',
     checadorSalida: 'Norma Bracamontes',
     coordSalida: '21.881306, -100.866196',
+    fotoSalidaFrontal: fotoPlaceholder('Foto de ejemplo — frente'),
+    fotoSalidaTrasera: fotoPlaceholder('Foto de ejemplo — atrás'),
   }
 
   const trips = [salidaPendiente, ...tripsSemanaActual, ...tripsSemanaAnterior]

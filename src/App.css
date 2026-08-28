@@ -438,6 +438,51 @@ button {
   color: var(--danger);
 }
 
+/* Aviso suave — algo que vale la pena que el Checador confirme (ej. volumen
+   fuera de lo esperado para la capacidad del camión), pero que no bloquea
+   el envío por sí solo como .field-error. */
+.field-warning {
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--warning);
+}
+
+/* Tarjeta de confirmación — hace imposible no notar un dato autocompletado
+   crítico (ej. qué Operador quedó ligado a la placa elegida), en vez de que
+   viva como un input de solo lectura chico entre muchos otros campos. */
+.confirm-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-md);
+}
+
+.confirm-card svg {
+  color: var(--success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.confirm-card-title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--success);
+}
+
+.confirm-card-detail {
+  margin: 0;
+  font-size: 14px;
+  font-family: var(--font-mono);
+  color: var(--ink-900);
+}
+
 /* ============================================================
    Vista previa de costo (formulario) — un momento de "atención al
    detalle": la cifra se actualiza en vivo, no es un simple texto plano.

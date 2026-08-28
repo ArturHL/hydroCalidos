@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { IconInbox, IconMapPin, IconTicket } from '@tabler/icons-react'
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconInbox,
+  IconMapPin,
+  IconTicket,
+} from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { DESTINOS, cadenamientoMasCercano, distanciaEsperada } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
@@ -24,6 +30,24 @@ const EMPTY_FORM = {
   fotoLlegadaTrasera: null,
 }
 
+// Pantalla de revisión antes de enviar — mismo patrón que en
+// FormSalidaPage.jsx/TicketPage.jsx.
+const REVIEW_FIELD_LABELS = {
+  destino: 'Destino (cadenamiento)',
+  distancia: 'Distancia (km)',
+  justificacion: 'Justificación',
+  checadorDestino: 'Checador',
+  coordLlegada: 'Coordenadas de llegada',
+}
+const REVIEW_FOTO_LABELS = {
+  fotoLlegadaFrontal: 'Camión cargado — frente',
+  fotoLlegadaTrasera: 'Camión cargado — atrás',
+}
+const SALIDA_FOTO_LABELS = {
+  fotoSalidaFrontal: 'Camión cargado en salida — frente',
+  fotoSalidaTrasera: 'Camión cargado en salida — atrás',
+}
+
 // Paso 2 del flujo de dos checadores: completa un viaje que el Checador de
 // salida ya abrió (origen/material/placa/operador/volumen) con los datos de
 // llegada. Aquí se genera el Ticket — ver FormSalidaPage.jsx para el paso 1.
@@ -32,6 +56,8 @@ function FormPage() {
   const { trips, completarLlegada } = useTrips()
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
+  const [revisando, setRevisando] = useState(false)
+  const [enviando, setEnviando] = useState(false)
 
   // El cadenamiento no está fijo en ningún perfil (a diferencia del banco
   // del Checador salida) — el checador se mueve dentro de los ~9 km del
@@ -40,7 +66,14 @@ function FormPage() {
   const [destinoSugeridoGPS, setDestinoSugeridoGPS] = useState(null)
   const [gpsDistanciaM, setGpsDistanciaM] = useState(null)
 
-  const pendientes = useMemo(() => trips.filter((t) => t.estado === 'en_transito'), [trips])
+  // Los más antiguos primero — el camión que lleva más tiempo esperando es
+  // el candidato más probable a ser el que está llegando ahora mismo, y con
+  // varios en tránsito a la vez reduce la chance de completar el viaje
+  // equivocado por elegir de una lista sin ningún orden.
+  const pendientes = useMemo(
+    () => [...trips].filter((t) => t.estado === 'en_transito').sort((a, b) => a.timestamp - b.timestamp),
+    [trips],
+  )
   const tripSeleccionado = pendientes.find((t) => t.id === form.tripId) ?? null
 
   const esperada =
@@ -123,7 +156,7 @@ function FormPage() {
     })
   }
 
-  function handleSubmit(event) {
+  function handleRevisar(event) {
     event.preventDefault()
 
     if (!tripSeleccionado) {
@@ -156,6 +189,13 @@ function FormPage() {
       return
     }
 
+    setError('')
+    setRevisando(true)
+  }
+
+  function handleConfirmar() {
+    if (enviando || !tripSeleccionado) return
+    setEnviando(true)
     const trip = completarLlegada(tripSeleccionado.id, {
       destino: form.destino,
       distancia: form.distancia,
@@ -185,10 +225,82 @@ function FormPage() {
     )
   }
 
+  if (revisando && tripSeleccionado) {
+    return (
+      <section className="page-narrow">
+        <h1>Formulario de llegada</h1>
+        <div className="form-stack">
+          <p className="field-hint">
+            Revisa los datos antes de enviar — una vez enviado, se genera el Ticket y no se puede
+            editar.
+          </p>
+
+          <dl className="ticket-summary">
+            <div>
+              <dt>Folio</dt>
+              <dd>{tripSeleccionado.folio}</dd>
+            </div>
+            <div>
+              <dt>Placa</dt>
+              <dd>{tripSeleccionado.placa}</dd>
+            </div>
+            {Object.entries(REVIEW_FIELD_LABELS)
+              .filter(([field]) => form[field])
+              .map(([field, label]) => (
+                <div key={field}>
+                  <dt>{label}</dt>
+                  <dd>{form[field]}</dd>
+                </div>
+              ))}
+          </dl>
+
+          <p className="field-hint" style={{ margin: 0 }}>
+            Compara contra las fotos de salida — confirma que es el mismo camión.
+          </p>
+          <div className="ticket-photos">
+            {Object.entries(SALIDA_FOTO_LABELS)
+              .filter(([field]) => tripSeleccionado[field])
+              .map(([field, label]) => (
+                <figure key={field}>
+                  <img src={tripSeleccionado[field]} alt={label} />
+                  <figcaption>{label}</figcaption>
+                </figure>
+              ))}
+            {Object.entries(REVIEW_FOTO_LABELS)
+              .filter(([field]) => form[field])
+              .map(([field, label]) => (
+                <figure key={field}>
+                  <img src={form[field]} alt={label} />
+                  <figcaption>{label}</figcaption>
+                </figure>
+              ))}
+          </div>
+
+          <div className="ticket-actions">
+            <motion.button
+              type="button"
+              className="btn-primary"
+              whileTap={{ scale: 0.97 }}
+              onClick={handleConfirmar}
+              disabled={enviando}
+            >
+              <IconCheck size={16} stroke={2} />
+              {enviando ? 'Enviando…' : 'Confirmar y generar ticket'}
+            </motion.button>
+            <button type="button" className="btn-secondary" onClick={() => setRevisando(false)}>
+              <IconArrowLeft size={16} stroke={2} />
+              Seguir editando
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="page-narrow">
       <h1>Formulario de llegada</h1>
-      <form onSubmit={handleSubmit} className="trip-form">
+      <form onSubmit={handleRevisar} className="trip-form">
         <div className="form-section">
           <p className="section-label">Viaje en tránsito</p>
 
@@ -207,6 +319,7 @@ function FormPage() {
               ))}
             </select>
           </label>
+          <p className="field-hint">Ordenados del que lleva más tiempo esperando al más reciente.</p>
         </div>
 
         {tripSeleccionado && (
@@ -238,6 +351,19 @@ function FormPage() {
                 <dd>{tripSeleccionado.checadorSalida}</dd>
               </div>
             </dl>
+            <p className="field-hint" style={{ margin: 0 }}>
+              Compara contra el camión frente a ti antes de continuar.
+            </p>
+            <div className="ticket-photos">
+              {Object.entries(SALIDA_FOTO_LABELS)
+                .filter(([field]) => tripSeleccionado[field])
+                .map(([field, label]) => (
+                  <figure key={field}>
+                    <img src={tripSeleccionado[field]} alt={label} />
+                    <figcaption>{label}</figcaption>
+                  </figure>
+                ))}
+            </div>
           </div>
         )}
 
@@ -394,7 +520,7 @@ function FormPage() {
 
         <motion.button type="submit" className="btn-primary" whileTap={{ scale: 0.97 }}>
           <IconTicket size={17} stroke={2} />
-          Generar ticket
+          Revisar antes de enviar
         </motion.button>
       </form>
     </section>
