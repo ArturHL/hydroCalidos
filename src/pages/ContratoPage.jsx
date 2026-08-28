@@ -101,6 +101,7 @@ function AcuerdoActual() {
   const [editando, setEditando] = useState(false)
   const [tarifas, setTarifas] = useState(vigente)
   const [mensaje, setMensaje] = useState('')
+  const [confirmandoAceptar, setConfirmandoAceptar] = useState(false)
 
   if (!proposal) {
     return (
@@ -199,13 +200,40 @@ function AcuerdoActual() {
           </label>
         )}
 
-        {esMiTurno && !editando && (
+        {esMiTurno && !editando && confirmandoAceptar && (
+          <>
+            <p className="field-hint" style={{ margin: 0 }}>
+              ¿Confirmas aceptar esta revisión de tarifas? No se puede deshacer.
+            </p>
+            <div className="ticket-actions">
+              <motion.button
+                type="button"
+                className="btn-accept"
+                whileTap={{ scale: 0.97 }}
+                onClick={() => aceptarPropuesta({ autor: role })}
+              >
+                <IconCheck size={16} stroke={2} />
+                Sí, aceptar revisión
+              </motion.button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setConfirmandoAceptar(false)}
+              >
+                <IconX size={16} stroke={2} />
+                Cancelar
+              </button>
+            </div>
+          </>
+        )}
+
+        {esMiTurno && !editando && !confirmandoAceptar && (
           <div className="ticket-actions">
             <motion.button
               type="button"
               className="btn-accept"
               whileTap={{ scale: 0.97 }}
-              onClick={() => aceptarPropuesta({ autor: role })}
+              onClick={() => setConfirmandoAceptar(true)}
             >
               <IconCheck size={16} stroke={2} />
               Aceptar revisión
@@ -225,19 +253,33 @@ function AcuerdoActual() {
         )}
 
         {esMiTurno && editando && (
-          <motion.button
-            type="button"
-            className="btn-primary"
-            whileTap={{ scale: 0.97 }}
-            onClick={() => {
-              enviarPropuesta({ autor: role, tarifas, mensaje })
-              setEditando(false)
-              setMensaje('')
-            }}
-          >
-            <IconSend size={16} stroke={2} />
-            Enviar contraoferta
-          </motion.button>
+          <div className="ticket-actions">
+            <motion.button
+              type="button"
+              className="btn-primary"
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                enviarPropuesta({ autor: role, tarifas, mensaje })
+                setEditando(false)
+                setMensaje('')
+              }}
+            >
+              <IconSend size={16} stroke={2} />
+              Enviar contraoferta
+            </motion.button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                setTarifas(proposal.tarifas)
+                setMensaje('')
+                setEditando(false)
+              }}
+            >
+              <IconX size={16} stroke={2} />
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
 

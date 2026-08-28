@@ -8,6 +8,7 @@ import {
   IconInbox,
   IconRefresh,
   IconSend,
+  IconX,
 } from '@tabler/icons-react'
 import { ROLES, useRole } from '../context/RoleContext.jsx'
 import { useTrips } from '../context/TripsContext.jsx'
@@ -198,6 +199,7 @@ function EnProceso() {
   const [ediciones, setEdiciones] = useState(() => buildInicial(tripsAbiertos))
   const [mensaje, setMensaje] = useState('')
   const [contraofertando, setContraofertando] = useState(false)
+  const [confirmandoAceptar, setConfirmandoAceptar] = useState(false)
 
   useEffect(() => {
     setEdiciones((prev) => buildInicial(tripsAbiertos, prev))
@@ -334,43 +336,81 @@ function EnProceso() {
             setMensaje={setMensaje}
           />
           {esMiTurno && (
-            <motion.button
-              type="button"
-              className="btn-primary"
-              whileTap={{ scale: 0.97 }}
-              onClick={() => {
-                enviarPropuesta({ autor: role, ediciones, mensaje })
-                setMensaje('')
-                setContraofertando(false)
-              }}
-            >
-              <IconSend size={16} stroke={2} />
-              Enviar contraoferta
-            </motion.button>
+            <div className="ticket-actions">
+              <motion.button
+                type="button"
+                className="btn-primary"
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  enviarPropuesta({ autor: role, ediciones, mensaje })
+                  setMensaje('')
+                  setContraofertando(false)
+                }}
+              >
+                <IconSend size={16} stroke={2} />
+                Enviar contraoferta
+              </motion.button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setEdiciones(proposal.ediciones)
+                  setMensaje('')
+                  setContraofertando(false)
+                }}
+              >
+                <IconX size={16} stroke={2} />
+                Cancelar
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {esMiTurno && !contraofertando && (
+      {esMiTurno && !contraofertando && confirmandoAceptar && (
+        <div className="form-stack">
+          <p className="field-hint" style={{ margin: 0 }}>
+            ¿Confirmas aceptar esta conciliación? Los viajes quedarán marcados como conciliados y
+            no se puede deshacer.
+          </p>
+          <div className="ticket-actions">
+            <motion.button
+              type="button"
+              className="btn-accept"
+              whileTap={{ scale: 0.97 }}
+              onClick={() =>
+                aceptarPropuesta({
+                  autor: role,
+                  aplicarCambios: (edic) => {
+                    Object.entries(edic).forEach(([tripId, edicion]) =>
+                      updateTrip(tripId, {
+                        distancia: edicion.distancia,
+                        excepcion: false,
+                        conciliado: true,
+                      }),
+                    )
+                  },
+                })
+              }
+            >
+              <IconCheck size={16} stroke={2} />
+              Sí, aceptar conciliación
+            </motion.button>
+            <button type="button" className="btn-secondary" onClick={() => setConfirmandoAceptar(false)}>
+              <IconX size={16} stroke={2} />
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {esMiTurno && !contraofertando && !confirmandoAceptar && (
         <div className="ticket-actions">
           <motion.button
             type="button"
             className="btn-accept"
             whileTap={{ scale: 0.97 }}
-            onClick={() =>
-              aceptarPropuesta({
-                autor: role,
-                aplicarCambios: (edic) => {
-                  Object.entries(edic).forEach(([tripId, edicion]) =>
-                    updateTrip(tripId, {
-                      distancia: edicion.distancia,
-                      excepcion: false,
-                      conciliado: true,
-                    }),
-                  )
-                },
-              })
-            }
+            onClick={() => setConfirmandoAceptar(true)}
           >
             <IconCheck size={16} stroke={2} />
             Aceptar conciliación
