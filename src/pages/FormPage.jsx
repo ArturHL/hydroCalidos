@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { IconInbox, IconTicket } from '@tabler/icons-react'
+import { IconInbox, IconMapPin, IconTicket } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
-import { DESTINOS, distanciaEsperada } from '../data/mockContract.js'
+import { DESTINOS, cadenamientoMasCercano, distanciaEsperada } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -30,6 +30,13 @@ function FormPage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
 
+  // El cadenamiento no está fijo en ningún perfil (a diferencia del banco
+  // del Checador salida) — el checador se mueve dentro de los ~9 km del
+  // tramo, así que aquí sí conviene detectarlo por GPS.
+  const [gpsEstado, setGpsEstado] = useState('idle') // idle | buscando | ok | sin_match | error
+  const [destinoSugeridoGPS, setDestinoSugeridoGPS] = useState(null)
+  const [gpsDistanciaM, setGpsDistanciaM] = useState(null)
+
   const pendientes = useMemo(() => trips.filter((t) => t.estado === 'en_transito'), [trips])
   const tripSeleccionado = pendientes.find((t) => t.id === form.tripId) ?? null
 
@@ -39,6 +46,40 @@ function FormPage() {
       : null
   const distanciaModificada =
     esperada !== null && form.distancia !== '' && Number(form.distancia) !== esperada
+  const destinoModificadoDeGPS =
+    destinoSugeridoGPS !== null && form.destino !== '' && form.destino !== destinoSugeridoGPS
+  const requiereJustificacion = distanciaModificada || destinoModificadoDeGPS
+
+  useEffect(() => {
+    setGpsEstado('idle')
+    setDestinoSugeridoGPS(null)
+    setGpsDistanciaM(null)
+  }, [form.tripId])
+
+  function detectarUbicacion() {
+    if (!navigator.geolocation) {
+      setGpsEstado('error')
+      return
+    }
+    setGpsEstado('buscando')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const match = cadenamientoMasCercano(pos.coords.latitude, pos.coords.longitude)
+        if (match) {
+          setDestinoSugeridoGPS(match.cadenamiento)
+          setGpsDistanciaM(match.distanciaM)
+          setGpsEstado('ok')
+          updateField('destino', match.cadenamiento)
+        } else {
+          setDestinoSugeridoGPS(null)
+          setGpsDistanciaM(null)
+          setGpsEstado('sin_match')
+        }
+      },
+      () => setGpsEstado('error'),
+      { enableHighAccuracy: true, timeout: 8000 },
+    )
+  }
 
   const costoEstimado = tripSeleccionado
     ? calcularCostoViaje({
@@ -65,7 +106,9 @@ function FormPage() {
         const origen = pendientes.find((t) => t.id === prev.tripId)?.origen
         const nuevaEsperada = origen ? distanciaEsperada(origen, value) : null
         next.distancia = nuevaEsperada !== null ? String(nuevaEsperada) : ''
-        next.justificacion = ''
+        // Se limpia salvo que este cambio siga contradiciendo lo que
+        // detectó el GPS — si no se usó GPS, siempre se limpia.
+        if (destinoSugeridoGPS === null || value === destinoSugeridoGPS) next.justificacion = ''
       }
 
       return next
@@ -87,9 +130,9 @@ function FormPage() {
       return
     }
 
-    if (distanciaModificada && !form.justificacion.trim()) {
+    if (requiereJustificacion && !form.justificacion.trim()) {
       setError(
-        'La distancia no coincide con la esperada para esta ruta. Agrega una justificación para continuar.',
+        'La distancia o el cadenamiento no coinciden con lo esperado. Agrega una justificación para continuar.',
       )
       return
     }
@@ -198,6 +241,39 @@ function FormPage() {
                 </select>
               </label>
 
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={detectarUbicacion}
+                disabled={gpsEstado === 'buscando'}
+              >
+                <IconMapPin size={16} stroke={2} />
+                {gpsEstado === 'buscando' ? 'Buscando ubicación…' : 'Detectar cadenamiento por GPS'}
+              </button>
+
+              {gpsEstado === 'ok' && (
+                <p className="field-hint">
+                  GPS detectó {destinoSugeridoGPS} (a {gpsDistanciaM} m de tu ubicación).
+                </p>
+              )}
+              {gpsEstado === 'sin_match' && (
+                <p className="field-hint">
+                  No se detectó ningún cadenamiento conocido cerca de tu ubicación — selecciona
+                  manualmente.
+                </p>
+              )}
+              {gpsEstado === 'error' && (
+                <p className="field-hint">
+                  No se pudo obtener tu ubicación (permiso denegado o GPS no disponible) —
+                  selecciona manualmente.
+                </p>
+              )}
+              {destinoModificadoDeGPS && (
+                <p className="field-hint">
+                  Elegiste un cadenamiento distinto al detectado por GPS ({destinoSugeridoGPS}).
+                </p>
+              )}
+
               <label>
                 Distancia (km)
                 <input
@@ -218,7 +294,7 @@ function FormPage() {
               )}
 
               <AnimatePresence initial={false}>
-                {distanciaModificada && (
+                {requiereJustificacion && (
                   <motion.label
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -226,7 +302,7 @@ function FormPage() {
                     transition={{ duration: 0.2, ease: EASE }}
                     style={{ overflow: 'hidden' }}
                   >
-                    Justificación del cambio de distancia
+                    Justificación del cambio
                     <textarea
                       name="justificacion"
                       value={form.justificacion}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { IconInbox, IconTrash, IconUserPlus } from '@tabler/icons-react'
 import { usePersonal } from '../context/PersonalContext.jsx'
+import { BANCOS } from '../data/mockContract.js'
 import AnimatedTabs from '../components/AnimatedTabs.jsx'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -21,7 +22,14 @@ function ChecadoresTab() {
 
   function updateField(field, value) {
     setError('')
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => {
+      const next = { ...prev, [field]: value }
+      // El Checador salida tiene un banco fijo como lugar de trabajo (select
+      // cerrado); el de destino trabaja el tramo completo (texto libre). Si
+      // cambia el tipo, el valor anterior de "obra" ya no aplica.
+      if (field === 'tipo') next.obra = ''
+      return next
+    })
   }
 
   function handleSubmit(event) {
@@ -51,16 +59,6 @@ function ChecadoresTab() {
           </label>
 
           <label>
-            Lugar de trabajo / obra
-            <input
-              type="text"
-              value={form.obra}
-              onChange={(e) => updateField('obra', e.target.value)}
-              placeholder="Ej. Tramo Km 50-66, turno matutino"
-            />
-          </label>
-
-          <label>
             Tipo
             <select value={form.tipo} onChange={(e) => updateField('tipo', e.target.value)}>
               <option value="">Selecciona un tipo</option>
@@ -68,6 +66,36 @@ function ChecadoresTab() {
               <option value="destino">Checador destino</option>
             </select>
           </label>
+
+          {form.tipo === 'salida' ? (
+            <label>
+              Banco asignado (lugar de trabajo)
+              <select value={form.obra} onChange={(e) => updateField('obra', e.target.value)}>
+                <option value="">Selecciona un banco</option>
+                {BANCOS.map((b) => (
+                  <option key={b.nombre} value={b.nombre}>
+                    {b.nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label>
+              Lugar de trabajo / obra
+              <input
+                type="text"
+                value={form.obra}
+                onChange={(e) => updateField('obra', e.target.value)}
+                placeholder="Ej. Tramo Km 50-66, turno matutino"
+                disabled={!form.tipo}
+              />
+            </label>
+          )}
+          {form.tipo === 'salida' && (
+            <p className="field-hint">
+              El Formulario de salida autocompleta el banco con este dato — sin GPS de ese lado.
+            </p>
+          )}
         </div>
 
         {error && <p className="field-error">{error}</p>}

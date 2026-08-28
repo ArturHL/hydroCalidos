@@ -1,3 +1,5 @@
+import { puntoMasCercano } from '../utils/geo.js'
+
 // Bancos y cadenamientos reales de un tramo carretero en San Luis Potosí
 // (km 50-66), tomados del documento firmado "Distancias Acarreos
 // (Conciliación)" — ver docs/business/muestras en el proyecto Volteo. Nombres
@@ -31,6 +33,33 @@ export const BANCOS = [
 // distancias de acarreo (un "tiro" confirmado por banco, verificado
 // aritméticamente: diferencia de cadenamiento + desviación de entrada).
 export const DESTINOS = ['54+700', '53+100', '59+760', '57+920', '61+010', '52+500']
+
+// Coordenadas aproximadas de cada cadenamiento — inventadas de forma
+// razonable interpolando entre las coordenadas de salida/llegada que ya
+// usa el demo (seedData.js), no un levantamiento real. Sirven para el
+// autocompletado por GPS del Checador destino (ver cadenamientoMasCercano).
+export const DESTINO_COORDS = {
+  '52+500': { lat: 21.881306, lng: -100.866196 },
+  '53+100': { lat: 21.882655, lng: -100.868712 },
+  '54+700': { lat: 21.886249, lng: -100.875416 },
+  '57+920': { lat: 21.893487, lng: -100.889909 },
+  '59+760': { lat: 21.897621, lng: -100.896622 },
+  '61+010': { lat: 21.900431, lng: -100.901859 },
+}
+
+// El Checador destino no sabe de antemano en qué cadenamiento está —a
+// diferencia del banco (ver "lugar de trabajo" en PersonalContext), el
+// tramo tiene ~9 km y el checador se mueve dentro de él. El GPS sí aporta
+// algo aquí: busca el cadenamiento conocido más cercano a su ubicación
+// actual (null si ninguno cae dentro del radio razonable).
+export function cadenamientoMasCercano(lat, lng) {
+  const puntos = Object.entries(DESTINO_COORDS).map(([cadenamiento, coords]) => ({
+    id: cadenamiento,
+    ...coords,
+  }))
+  const match = puntoMasCercano(lat, lng, puntos)
+  return match ? { cadenamiento: match.id, distanciaM: match.distanciaM } : null
+}
 
 const DISTANCIAS_ESPERADAS = {
   'Banco Las Rampas|54+700': 3,

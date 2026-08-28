@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { IconArrowUpRight } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { usePersonal } from '../context/PersonalContext.jsx'
 import { BANCOS, materialesPorBanco } from '../data/mockContract.js'
+
+const EASE = [0.16, 1, 0.3, 1]
 
 // El Checador de salida ya inició sesión con su propio usuario — igual que
 // CHECADOR_ACTUAL en FormPage.jsx (destino), este campo no se escribe a
@@ -14,6 +16,7 @@ const CHECADOR_SALIDA_ACTUAL = 'Rosaura Delgado'
 const EMPTY_FORM = {
   origen: '',
   material: '',
+  justificacionOrigen: '',
   placa: '',
   capacidad: '',
   volumen: '',
@@ -29,9 +32,23 @@ const EMPTY_FORM = {
 function FormSalidaPage() {
   const navigate = useNavigate()
   const { addSalida } = useTrips()
-  const { operadores, operadorPorPlaca } = usePersonal()
+  const { operadores, operadorPorPlaca, checadorPorNombre } = usePersonal()
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
+
+  // El banco no se detecta por GPS — ya está fijo en el perfil de RH del
+  // Checador de salida (su "lugar de trabajo"), así que no hace falta pedir
+  // ubicación de este lado.
+  const miPerfil = checadorPorNombre(CHECADOR_SALIDA_ACTUAL, 'salida')
+  const bancoAsignado = miPerfil?.obra || null
+  const origenModificado =
+    bancoAsignado !== null && form.origen !== '' && form.origen !== bancoAsignado
+
+  useEffect(() => {
+    if (bancoAsignado) {
+      setForm((prev) => (prev.origen === '' ? { ...prev, origen: bancoAsignado } : prev))
+    }
+  }, [bancoAsignado])
 
   const materialesDisponibles = materialesPorBanco(form.origen)
 
@@ -42,6 +59,7 @@ function FormSalidaPage() {
 
       if (field === 'origen') {
         next.material = ''
+        if (value === bancoAsignado) next.justificacionOrigen = ''
       }
 
       if (field === 'placa') {
@@ -76,6 +94,13 @@ function FormSalidaPage() {
       return
     }
 
+    if (origenModificado && !form.justificacionOrigen.trim()) {
+      setError(
+        'El banco no coincide con tu lugar de trabajo registrado. Agrega una justificación para continuar.',
+      )
+      return
+    }
+
     const trip = addSalida(form)
     setForm(EMPTY_FORM)
     navigate(`/salida/${trip.id}`)
@@ -106,6 +131,31 @@ function FormSalidaPage() {
               ))}
             </select>
           </label>
+          {bancoAsignado && (
+            <p className="field-hint">
+              Autocompletado con tu lugar de trabajo registrado en RH ({bancoAsignado}).
+            </p>
+          )}
+
+          <AnimatePresence initial={false}>
+            {origenModificado && (
+              <motion.label
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: EASE }}
+                style={{ overflow: 'hidden' }}
+              >
+                Justificación del cambio de banco
+                <textarea
+                  name="justificacionOrigen"
+                  value={form.justificacionOrigen}
+                  onChange={(e) => updateField('justificacionOrigen', e.target.value)}
+                  rows={3}
+                />
+              </motion.label>
+            )}
+          </AnimatePresence>
 
           <label>
             Material

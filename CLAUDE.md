@@ -38,8 +38,10 @@ src/
     ContratoContext.jsx    negociación de tarifas del contrato (volteo_contrato)
     PersonalContext.jsx    Checadores (con tipo salida/destino)/Operadores dados de alta por RH (volteo_checadores, volteo_operadores)
   data/
-    mockContract.js        bancos → materiales permitidos, distancias esperadas por ruta (banco-destino)
+    mockContract.js        bancos → materiales permitidos, distancias esperadas por ruta (banco-destino), coordenadas de cadenamientos + cadenamientoMasCercano()
     mockTarifas.js         tarifas por clase de material (Piedra vs. resto)
+  utils/
+    geo.js                 Haversine + coincidencia por cercanía contra un catálogo cerrado de puntos (GPS del Checador destino)
   pages/
     FormSalidaPage.jsx     Formulario de salida (Checador salida) — abre el viaje
     SalidaConfirmPage.jsx  Confirmación de salida (folio, sin costo, sin ticket todavía)
@@ -56,17 +58,17 @@ src/
 
 ## Qué ya funciona
 
-1. **Formulario de salida** (`/formulario-salida`, rol Checador salida): paso 1 del viaje — Origen (banco) → filtra Material disponible. Placa es un catálogo cerrado sacado de los Operadores que RH dio de alta (`PersonalContext`, ya no un mock estático) — elegirla **autocompleta Nombre del operador (solo lectura, va ligado 1:1 al camión), Capacidad nominal y Representante del Transportista** (estos dos últimos editables). Volumen real cargado, Checador (readOnly, `CHECADOR_SALIDA_ACTUAL` fijo en `FormSalidaPage.jsx`, simula sesión iniciada) y Coordenadas de salida. Sin costo — todavía no hay distancia. Al enviar, `addSalida()` (`TripsContext`) crea el viaje con `estado: 'en_transito'` y navega a `/salida/:id` (confirmación simple, no es el Ticket).
-2. **Formulario de llegada** (`/formulario`, rol Checador destino): paso 2 — selecciona de una lista el viaje **en tránsito** que llegó (folio + placa + origen), ve en solo lectura lo que el Checador de salida ya capturó (origen, material, placa, operador, volumen, Checador de salida), y completa Destino (cadenamiento) → Distancia (se autosugiere según la ruta; si el checador la cambia, exige justificación), Checador (readOnly, `CHECADOR_DESTINO_ACTUAL` fijo) y Coordenadas de llegada. Si no hay viajes en tránsito, empty-state pidiendo esperar al Checador de salida. El costo estimado **no se muestra en ningún punto de este flujo** (ni salida ni destino ven montos — se calcula y guarda para Registros/Métricas/Conciliación, pantallas de Contador). Al enviar, `completarLlegada()` marca `estado: 'completado'` y navega a `/ticket/:id` — aquí es donde se genera el Ticket, no en el paso 1.
+1. **Formulario de salida** (`/formulario-salida`, rol Checador salida): paso 1 del viaje — Origen (banco) **autocompletado con el "lugar de trabajo" registrado en el perfil de RH del checador** (`checadorPorNombre()`, `PersonalContext`) — sin GPS de este lado, porque el banco ya está fijo en su perfil (no como el cadenamiento del destino, que sí varía). Si el checador lo cambia a un banco distinto al asignado, exige una justificación de texto (`justificacionOrigen`) para poder enviar — mismo patrón anti-fraude que la distancia en el paso 2. → filtra Material disponible. Placa es un catálogo cerrado sacado de los Operadores que RH dio de alta — elegirla **autocompleta Nombre del operador (solo lectura, va ligado 1:1 al camión), Capacidad nominal y Representante del Transportista** (estos dos últimos editables). Volumen real cargado, Checador (readOnly, `CHECADOR_SALIDA_ACTUAL` fijo en `FormSalidaPage.jsx`, simula sesión iniciada) y Coordenadas de salida. Sin costo — todavía no hay distancia. Al enviar, `addSalida()` (`TripsContext`) crea el viaje con `estado: 'en_transito'` y navega a `/salida/:id` (confirmación simple, no es el Ticket).
+2. **Formulario de llegada** (`/formulario`, rol Checador destino): paso 2 — selecciona de una lista el viaje **en tránsito** que llegó (folio + placa + origen), ve en solo lectura lo que el Checador de salida ya capturó (origen, material, placa, operador, volumen, Checador de salida), y completa Destino (cadenamiento). Botón **"Detectar cadenamiento por GPS"** (`navigator.geolocation` + `cadenamientoMasCercano()` en `mockContract.js`, coincidencia por cercanía tipo Haversine contra los 6 puntos conocidos del tramo, `src/utils/geo.js`) — autocompleta el destino si hay un punto conocido a menos de 400 m; si no, pide selección manual (sin match, permiso denegado, o sin soporte de geolocalización, cada caso con su propio mensaje). Distancia se autosugiere según la ruta; si el checador cambia la distancia **o** el cadenamiento detectado por GPS, exige justificación (`justificacion`, un solo campo, dispara con cualquiera de los dos motivos). Checador (readOnly, `CHECADOR_DESTINO_ACTUAL` fijo) y Coordenadas de llegada. Si no hay viajes en tránsito, empty-state pidiendo esperar al Checador de salida. El costo estimado **no se muestra en ningún punto de este flujo** (ni salida ni destino ven montos — se calcula y guarda para Registros/Métricas/Conciliación, pantallas de Contador). Al enviar, `completarLlegada()` marca `estado: 'completado'` y navega a `/ticket/:id` — aquí es donde se genera el Ticket, no en el paso 1.
 3. **Ticket generado** (`/ticket/:id`): resumen de datos (sin costo, incluye Checador de salida y Checador de destino) + botón Imprimir (`window.print()`, básico, sin diseño de impresión elaborado) + volver al Formulario de llegada.
 4. **Registros** (`/registros`, rol Contador): tabla de todos los viajes (en tránsito y completados), con columna "Estado" (badge "En tránsito"/"Completado"), columnas separadas "Checador salida"/"Checador destino", y badge de "Excepción" cuando la distancia no coincidió con la esperada.
 5. **Conciliación** (`/conciliacion`, rol Contador): tab "En proceso" — el botón "Iniciar conciliación semanal" está disponible mientras haya al menos un viaje **completado y sin conciliar** en los últimos 7 días (un viaje todavía en tránsito no tiene costo, no puede entrar) (filtro por `timestamp`, con o sin excepción — es un proceso obligatorio, no depende de que existan excepciones). Al aceptar una conciliación, cada viaje incluido queda marcado `conciliado: true` (`TripsContext`) — un viaje ya conciliado no vuelve a aparecer en una conciliación futura, y **si no queda ningún viaje pendiente, la opción de iniciar conciliación desaparece por completo** (empty-state distinto, sin botón). Registros (`/registros`) tiene una columna "Conciliado" para verlo de un vistazo. La tabla de revisión muestra columna de Excepción y la **justificación íntegra que escribió el Checador destino** al capturar el viaje (antes solo vivía como tooltip en Registros). Turno alterna entre las dos partes; aceptar aplica los cambios a cada viaje, limpia su excepción y lo marca conciliado. Tab "Historial" (conciliaciones cerradas con el rastro completo de rondas; "Descargar Excel" exporta **todos los viajes que estuvieron en esa conciliación**, no solo los que tuvieron un ajuste — `ediciones` se siembra con todos los viajes del periodo desde que se abre, no solo las excepciones).
 6. **Contrato actual** (`/contrato`, rol Contador): mismo patrón de negociación que Conciliación pero sobre las tarifas (5 bandas de distancia × 3 categorías de material — ver más abajo). Tab "Acuerdo actual" (tabla vigente + Solicitar revisión) y tab "Historial". También lista el catálogo de bancos/materiales como referencia de solo lectura.
 7. **Métricas** (`/metricas`, rol Contador): KPIs de la semana actual vs. la anterior (viajes, km, volumen transportado, costo), desglose de costo por categoría de material, todo calculado con `calcularCostoViaje`. Solo cuenta viajes **completados** (uno en tránsito no tiene distancia/costo). Sin combustible/diésel, como se pidió.
 8. **Panel del Dueño** (`/panel-dueno`, rol Dueño/Representante): KPIs de solo lectura (viajes totales, costo acumulado, excepciones abiertas, conciliaciones cerradas — solo viajes **completados**) + historial de conciliaciones. Cero botones de edición/negociación — el rol confirmado por el socio ("Duenos y representantes... sin acceso a modificar datos, solo verlos", `docs/business/CUESTIONARIO_SOCIO.md` §0 en Volteo). Verificado con Puppeteer headless que no aparece ningún botón de guardar/enviar/proponer/aceptar/descargar en esta pantalla.
-9. **RH** (`/rh`, rol RH): alta de Checadores (nombre + lugar de trabajo/obra + **tipo: salida o destino**) y Operadores (nombre + placa + Representante del Transportista asignado + capacidad del camión), persistidos en `PersonalContext`/`localStorage` (`volteo_checadores`, `volteo_operadores`). Reemplaza los catálogos estáticos `mockCamiones.js`/`mockOperadores.js` (eliminados) — ahora Placa/Operador en los Formularios salen de perfiles reales dados de alta aquí, no de un mock hardcodeado. RH no puede dar de alta dos Operadores con la misma placa (`placaEnUso()`, error en pantalla si se intenta) — es la llave que usan ambos Formularios para el autocompletado. Tabs "Checadores"/"Operadores", cada uno con su formulario de alta + tabla con botón de eliminar por fila.
+9. **RH** (`/rh`, rol RH): alta de Checadores (nombre + **tipo: salida o destino** + lugar de trabajo/obra) y Operadores (nombre + placa + Representante del Transportista asignado + capacidad del camión), persistidos en `PersonalContext`/`localStorage` (`volteo_checadores`, `volteo_operadores`). El campo "lugar de trabajo" **depende del tipo**: para Checador salida es un select cerrado de Bancos (`BANCOS` de `mockContract.js`) — es la llave que usa el Formulario de salida para autocompletar el Origen; para Checador destino sigue siendo texto libre (su cadenamiento se detecta por GPS en el Formulario de llegada, no depende de este campo). Reemplaza los catálogos estáticos `mockCamiones.js`/`mockOperadores.js` (eliminados) — ahora Placa/Operador en los Formularios salen de perfiles reales dados de alta aquí, no de un mock hardcodeado. RH no puede dar de alta dos Operadores con la misma placa (`placaEnUso()`, error en pantalla si se intenta). Tabs "Checadores"/"Operadores", cada uno con su formulario de alta + tabla con botón de eliminar por fila.
 
-Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada. El flujo de RH (alta de Checador/Operador, rechazo de placa duplicada, autocompletado de Nombre/Capacidad/Representante al elegir placa en el Formulario, y que eliminar un Operador desde RH lo quita del select de Placa) también se probó end-to-end con Puppeteer (18/18 checks). El flujo de dos Checadores (salida abre con `addSalida()`, destino lo completa con `completarLlegada()` y genera el Ticket, el viaje desaparece de "en tránsito" una vez cerrado, Conciliación/Métricas/Panel del Dueño excluyen los viajes en tránsito) también se probó end-to-end con Puppeteer (27/27 checks).
+Los flujos de Conciliación y Contrato actual, y el flujo Formulario→Ticket→Registros→Métricas, se probaron end-to-end con scripts de Puppeteer headless (no versionados, se usaron y se borraron en la sesión) — pasaron todos los checks, incluyendo que el costo calculado coincide exacto con la fórmula esperada. El flujo de RH (alta de Checador/Operador, rechazo de placa duplicada, autocompletado de Nombre/Capacidad/Representante al elegir placa en el Formulario, y que eliminar un Operador desde RH lo quita del select de Placa) también se probó end-to-end con Puppeteer (18/18 checks). El flujo de dos Checadores (salida abre con `addSalida()`, destino lo completa con `completarLlegada()` y genera el Ticket, el viaje desaparece de "en tránsito" una vez cerrado, Conciliación/Métricas/Panel del Dueño excluyen los viajes en tránsito) también se probó end-to-end con Puppeteer (27/27 checks). El autocompletado por perfil (banco) y por GPS (cadenamiento) — incluyendo el `overridePermissions`/`page.setGeolocation()` de Puppeteer para simular ubicación, la coincidencia correcta contra un punto conocido, el caso "sin match" con una ubicación lejana (CDMX), y que cambiar cualquiera de los dos autocompletados exige justificación — también se probó end-to-end con Puppeteer (12/12 checks).
 
 ## Métricas: ya no es un placeholder
 
@@ -106,12 +108,14 @@ al selector de rol) — `src/components/SeedMenu.jsx` / `src/data/seedData.js`.
 viajes completados** repartidos en dos semanas, a propósito — una
 conciliación real no cubre solo un par de viajes de una semana a medias —
 más **10 Operadores** (uno por cada placa usada en los viajes semilla, cada
-uno con su propia capacidad y el mismo Representante `Raúl Ponce`) y **4
-Checadores** (2 de destino — `Lucía Vargas`, `Fernando Ibarra` — y 2 de
-salida — `Rosaura Delgado`, `Norma Bracamontes` — cada uno con su
-obra/turno) en `PersonalContext`, para que ambos Formularios tengan de
-inmediato con qué autocompletar sin que quien presente el pitch tenga que
-dar de alta nada a mano primero:
+uno con su propia capacidad y el mismo Representante `Raúl Ponce`) y **7
+Checadores** (2 de destino — `Lucía Vargas`, `Fernando Ibarra`, con su
+obra/turno como texto libre — y **5 de salida, uno por cada banco** —
+`Rosaura Delgado`→Banco Las Rampas, `Norma Bracamontes`→Banco Las Torres,
+`Herminia Casillas`→Banco Las Bombas, `Aurelio Sandoval`→Banco De Piedra,
+`Concepción Rivas`→Banco Clemente) en `PersonalContext`, para que ambos
+Formularios tengan de inmediato con qué autocompletar sin que quien
+presente el pitch tenga que dar de alta nada a mano primero:
 
 - **Semana anterior, completa y ya conciliada** (folios 1-12, 8 a 14 días
   atrás): los 12 viajes quedan marcados `conciliado: true` desde la
@@ -125,12 +129,16 @@ dar de alta nada a mano primero:
   Movimiento Interno (piso de facturación a 3 km) y una excepción
   **pendiente** (folio 22, hoy) lista para "Iniciar conciliación semanal"
   en vivo.
-- **En tránsito** (folio 23, hoy): un viaje que el Checador de salida ya
-  registró (no pasa por `crearViaje()`, se arma directo con `estado:
-  'en_transito'` y sin destino/distancia/costo) — para que en el pitch se
-  complete EN VIVO desde el Formulario de llegada (rol Checador destino) y
-  se vea generar el Ticket ahí mismo, sin tener que capturar una salida
-  nueva a mano primero.
+- **En tránsito** (folio 23, hoy, origen Banco Las Torres): un viaje que el
+  Checador de salida ya registró (no pasa por `crearViaje()`, se arma
+  directo con `estado: 'en_transito'` y sin destino/distancia/costo) — para
+  que en el pitch se complete EN VIVO desde el Formulario de llegada (rol
+  Checador destino) y se vea generar el Ticket ahí mismo, sin tener que
+  capturar una salida nueva a mano primero. Buen momento también para
+  demostrar el botón "Detectar cadenamiento por GPS" en vivo (funciona con
+  la ubicación real del dispositivo desde donde se haga la demo, si cae
+  dentro de 400 m de alguno de los 6 puntos conocidos — si no, cae al
+  "sin match" y se elige a mano, ambos casos están cubiertos).
 
 Esto también le da a Métricas una comparativa real semana-contra-semana en
 vez de "sin referencia". Pensado para que en un pitch solo se complete UN

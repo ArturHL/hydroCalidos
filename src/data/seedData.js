@@ -37,22 +37,30 @@ const OPERADORES_SEED = [
   { nombre: 'Nemesio Trujillo', placa: 'QYC-475', representante: 'Raúl Ponce', capacidad: '15' },
 ]
 
-// Dos Checadores de destino (los que ya existían, cierran el viaje al
-// llegar) y dos de salida (abren el viaje al cargar en el banco) — mismo
-// patrón de turno matutino/vespertino en ambos lados.
+// Dos Checadores de destino (los que ya existían, cubren el tramo completo,
+// cierran el viaje al llegar — su cadenamiento se detecta por GPS, no por
+// perfil) y un Checador de salida por cada banco (su "obra" ES el banco
+// donde está parado — el Formulario de salida lo usa para autocompletar el
+// Origen sin pedir GPS de ese lado).
 const CHECADORES_SEED = [
   { nombre: 'Lucía Vargas', obra: 'Tramo Km 50-66, turno matutino', tipo: 'destino' },
   { nombre: 'Fernando Ibarra', obra: 'Tramo Km 50-66, turno vespertino', tipo: 'destino' },
-  { nombre: 'Rosaura Delgado', obra: 'Bancos de material, turno matutino', tipo: 'salida' },
-  { nombre: 'Norma Bracamontes', obra: 'Bancos de material, turno vespertino', tipo: 'salida' },
+  { nombre: 'Rosaura Delgado', obra: 'Banco Las Rampas', tipo: 'salida' },
+  { nombre: 'Norma Bracamontes', obra: 'Banco Las Torres', tipo: 'salida' },
+  { nombre: 'Herminia Casillas', obra: 'Banco Las Bombas', tipo: 'salida' },
+  { nombre: 'Aurelio Sandoval', obra: 'Banco De Piedra', tipo: 'salida' },
+  { nombre: 'Concepción Rivas', obra: 'Banco Clemente', tipo: 'salida' },
 ]
 
-// El Checador de salida que abrió cada viaje, derivado del Checador destino
-// que lo cerró (mismo turno matutino/vespertino a ambos lados) — evita
+// El Checador de salida que abrió cada viaje, derivado del banco de origen
+// (cada uno tiene un Checador de salida fijo asignado, ver arriba) — evita
 // tener que anotarlo a mano en cada uno de los 22 viajes semilla.
-const SALIDA_POR_DESTINO = {
-  'Lucía Vargas': 'Rosaura Delgado',
-  'Fernando Ibarra': 'Norma Bracamontes',
+const SALIDA_POR_BANCO = {
+  'Banco Las Rampas': 'Rosaura Delgado',
+  'Banco Las Torres': 'Norma Bracamontes',
+  'Banco Las Bombas': 'Herminia Casillas',
+  'Banco De Piedra': 'Aurelio Sandoval',
+  'Banco Clemente': 'Concepción Rivas',
 }
 
 function fechaEn(diasAtras, hora = 10) {
@@ -96,7 +104,7 @@ function crearViaje({
     capacidad: String(Math.round(volumen)),
     volumen: String(volumen),
     operador,
-    checadorSalida: SALIDA_POR_DESTINO[checadorDestino] ?? '',
+    checadorSalida: SALIDA_POR_BANCO[origen] ?? '',
     checadorDestino,
     representanteTransportista,
     coordSalida: '21.881306, -100.866196',

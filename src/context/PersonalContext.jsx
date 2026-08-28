@@ -76,6 +76,13 @@ export function PersonalProvider({ children }) {
     return operadores.find((o) => o.placa === placa) ?? null
   }
 
+  // El Checador de salida tiene un banco fijo asignado como "lugar de
+  // trabajo" (su `obra`) — el Formulario de salida lo usa para
+  // autocompletar el Origen sin necesitar GPS de ese lado.
+  function checadorPorNombre(nombre, tipo) {
+    return checadores.find((c) => c.nombre === nombre && c.tipo === tipo) ?? null
+  }
+
   return (
     <PersonalContext.Provider
       value={{
@@ -87,6 +94,7 @@ export function PersonalProvider({ children }) {
         removeOperador,
         placaEnUso,
         operadorPorPlaca,
+        checadorPorNombre,
       }}
     >
       {children}
