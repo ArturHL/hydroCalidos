@@ -5,6 +5,7 @@ import { IconInbox, IconMapPin, IconTicket } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { DESTINOS, cadenamientoMasCercano, distanciaEsperada } from '../data/mockContract.js'
 import { calcularCostoViaje, distanciaFacturable } from '../data/mockTarifas.js'
+import PhotoCaptureField from '../components/PhotoCaptureField.jsx'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -19,6 +20,8 @@ const EMPTY_FORM = {
   justificacion: '',
   checadorDestino: CHECADOR_DESTINO_ACTUAL,
   coordLlegada: '',
+  fotoLlegadaFrontal: null,
+  fotoLlegadaTrasera: null,
 }
 
 // Paso 2 del flujo de dos checadores: completa un viaje que el Checador de
@@ -128,10 +131,21 @@ function FormPage() {
       return
     }
 
-    const camposObligatorios = ['destino', 'distancia', 'checadorDestino', 'coordLlegada']
+    const camposObligatorios = [
+      'destino',
+      'distancia',
+      'checadorDestino',
+      'coordLlegada',
+      'fotoLlegadaFrontal',
+      'fotoLlegadaTrasera',
+    ]
     const faltante = camposObligatorios.find((field) => !form[field])
     if (faltante) {
-      setError('Completa todos los campos antes de generar el ticket.')
+      setError(
+        faltante.startsWith('foto')
+          ? 'Toma las dos fotos del camión cargado (frente y atrás) antes de continuar.'
+          : 'Completa todos los campos antes de generar el ticket.',
+      )
       return
     }
 
@@ -150,6 +164,8 @@ function FormPage() {
       excepcion: distanciaModificada,
       checadorDestino: form.checadorDestino,
       coordLlegada: form.coordLlegada,
+      fotoLlegadaFrontal: form.fotoLlegadaFrontal,
+      fotoLlegadaTrasera: form.fotoLlegadaTrasera,
       costoEstimado,
     })
     setForm(EMPTY_FORM)
@@ -317,6 +333,24 @@ function FormPage() {
                   </motion.label>
                 )}
               </AnimatePresence>
+            </div>
+
+            <div className="form-section">
+              <p className="section-label">Evidencia fotográfica</p>
+
+              <PhotoCaptureField
+                label="Foto del camión cargado — frente"
+                value={form.fotoLlegadaFrontal}
+                onCapture={(foto) => updateField('fotoLlegadaFrontal', foto)}
+              />
+              <PhotoCaptureField
+                label="Foto del camión cargado — atrás"
+                value={form.fotoLlegadaTrasera}
+                onCapture={(foto) => updateField('fotoLlegadaTrasera', foto)}
+              />
+              <p className="field-hint">
+                Antes de descargar — confirma que el camión llegó con la carga completa.
+              </p>
             </div>
 
             <div className="form-section">

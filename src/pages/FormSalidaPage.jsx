@@ -5,6 +5,7 @@ import { IconArrowUpRight } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { usePersonal } from '../context/PersonalContext.jsx'
 import { BANCOS, coordenadasDeBanco, materialesPorBanco } from '../data/mockContract.js'
+import PhotoCaptureField from '../components/PhotoCaptureField.jsx'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -24,6 +25,8 @@ const EMPTY_FORM = {
   checadorSalida: CHECADOR_SALIDA_ACTUAL,
   representanteTransportista: '',
   coordSalida: '',
+  fotoSalidaFrontal: null,
+  fotoSalidaTrasera: null,
 }
 
 // Paso 1 del flujo de dos checadores: registra lo que se sabe al momento en
@@ -92,10 +95,16 @@ function FormSalidaPage() {
       'operador',
       'checadorSalida',
       'coordSalida',
+      'fotoSalidaFrontal',
+      'fotoSalidaTrasera',
     ]
     const faltante = camposObligatorios.find((field) => !form[field])
     if (faltante) {
-      setError('Completa todos los campos antes de registrar la salida.')
+      setError(
+        faltante.startsWith('foto')
+          ? 'Toma las dos fotos del camión cargado (frente y atrás) antes de continuar.'
+          : 'Completa todos los campos antes de registrar la salida.',
+      )
       return
     }
 
@@ -230,6 +239,21 @@ function FormSalidaPage() {
               onChange={(e) => updateField('volumen', e.target.value)}
             />
           </label>
+        </div>
+
+        <div className="form-section">
+          <p className="section-label">Evidencia fotográfica</p>
+
+          <PhotoCaptureField
+            label="Foto del camión cargado — frente"
+            value={form.fotoSalidaFrontal}
+            onCapture={(foto) => updateField('fotoSalidaFrontal', foto)}
+          />
+          <PhotoCaptureField
+            label="Foto del camión cargado — atrás"
+            value={form.fotoSalidaTrasera}
+            onCapture={(foto) => updateField('fotoSalidaTrasera', foto)}
+          />
         </div>
 
         <div className="form-section">

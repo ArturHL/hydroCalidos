@@ -23,6 +23,17 @@ const FIELD_LABELS = {
   coordLlegada: 'Coordenadas de llegada',
 }
 
+// Evidencia fotográfica — el camión cargado, tomada por cada Checador con
+// su propia cámara (nunca del carrete del dispositivo, ver
+// PhotoCaptureField.jsx). Van aparte de FIELD_LABELS porque el valor es una
+// imagen, no texto.
+const FOTO_LABELS = {
+  fotoSalidaFrontal: 'Cargado en salida — frente',
+  fotoSalidaTrasera: 'Cargado en salida — atrás',
+  fotoLlegadaFrontal: 'Cargado en llegada — frente',
+  fotoLlegadaTrasera: 'Cargado en llegada — atrás',
+}
+
 function TicketPage() {
   const { id } = useParams()
   const { trips } = useTrips()
@@ -61,6 +72,17 @@ function TicketPage() {
             </div>
           ))}
       </dl>
+
+      <div className="ticket-photos">
+        {Object.entries(FOTO_LABELS)
+          .filter(([field]) => trip[field])
+          .map(([field, label]) => (
+            <figure key={field}>
+              <img src={trip[field]} alt={label} />
+              <figcaption>{label}</figcaption>
+            </figure>
+          ))}
+      </div>
 
       <div className="ticket-actions no-print">
         <motion.button

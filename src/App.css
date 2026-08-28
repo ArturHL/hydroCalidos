@@ -542,6 +542,126 @@ button {
 }
 
 /* ============================================================
+   Captura de fotos — evidencia del camión cargado (Checador
+   salida/destino). Cámara propia dentro de la página, nunca la app
+   nativa de cámara ni el carrete del dispositivo (PhotoCaptureField.jsx).
+   ============================================================ */
+
+.photo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.photo-field-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.photo-field-preview img {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.camera-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(15, 18, 22, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.camera-modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.camera-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.camera-modal-head p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-900);
+}
+
+.camera-preview {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #000;
+}
+
+.camera-capture-btn {
+  align-self: center;
+}
+
+.camera-modal-error {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.camera-modal-error p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-700);
+}
+
+.ticket-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.ticket-photos figure {
+  margin: 0;
+}
+
+.ticket-photos img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.ticket-photos figcaption {
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--ink-500);
+  text-align: center;
+}
+
+/* ============================================================
    Tablas
    ============================================================ */
 
