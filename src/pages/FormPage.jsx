@@ -64,7 +64,12 @@ function FormPage() {
     setGpsEstado('buscando')
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const match = cadenamientoMasCercano(pos.coords.latitude, pos.coords.longitude)
+        const { latitude, longitude } = pos.coords
+        // La lectura cruda ya la tenemos para buscar el cadenamiento más
+        // cercano — se guarda también como Coordenadas de llegada, haya o
+        // no coincidencia, en vez de pedirle al checador que la teclee.
+        updateField('coordLlegada', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
+        const match = cadenamientoMasCercano(latitude, longitude)
         if (match) {
           setDestinoSugeridoGPS(match.cadenamiento)
           setGpsDistanciaM(match.distanciaM)
@@ -344,6 +349,9 @@ function FormPage() {
                   onChange={(e) => updateField('coordLlegada', e.target.value)}
                 />
               </label>
+              <p className="field-hint">
+                Se autocompleta al usar "Detectar cadenamiento por GPS" arriba.
+              </p>
             </div>
           </>
         )}

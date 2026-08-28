@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { IconArrowUpRight } from '@tabler/icons-react'
 import { useTrips } from '../context/TripsContext.jsx'
 import { usePersonal } from '../context/PersonalContext.jsx'
-import { BANCOS, materialesPorBanco } from '../data/mockContract.js'
+import { BANCOS, coordenadasDeBanco, materialesPorBanco } from '../data/mockContract.js'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -46,7 +46,11 @@ function FormSalidaPage() {
 
   useEffect(() => {
     if (bancoAsignado) {
-      setForm((prev) => (prev.origen === '' ? { ...prev, origen: bancoAsignado } : prev))
+      setForm((prev) =>
+        prev.origen === ''
+          ? { ...prev, origen: bancoAsignado, coordSalida: coordenadasDeBanco(bancoAsignado) }
+          : prev,
+      )
     }
   }, [bancoAsignado])
 
@@ -59,6 +63,7 @@ function FormSalidaPage() {
 
       if (field === 'origen') {
         next.material = ''
+        next.coordSalida = coordenadasDeBanco(value)
         if (value === bancoAsignado) next.justificacionOrigen = ''
       }
 
@@ -268,6 +273,7 @@ function FormSalidaPage() {
               onChange={(e) => updateField('coordSalida', e.target.value)}
             />
           </label>
+          <p className="field-hint">Autocompletadas con la ubicación registrada del banco.</p>
         </div>
 
         {error && <p className="field-error">{error}</p>}

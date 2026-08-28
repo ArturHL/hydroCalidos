@@ -27,6 +27,25 @@ export const BANCOS = [
   },
 ]
 
+// Coordenadas aproximadas de cada banco — inventadas de forma razonable,
+// cercanas al tramo (Banco Las Rampas cerca de 52+000, ver comentario en
+// DISTANCIAS_ESPERADAS más abajo), no un levantamiento real. A diferencia
+// del cadenamiento, el banco de un Checador salida ya es un dato fijo en su
+// perfil de RH — estas coordenadas no se usan para "detectar" nada, solo
+// para autocompletar Coordenadas de salida sin pedirle GPS a ese lado.
+export const BANCO_COORDS = {
+  'Banco Las Rampas': { lat: 21.884512, lng: -100.870338 },
+  'Banco Las Torres': { lat: 21.879932, lng: -100.86215 },
+  'Banco Las Bombas': { lat: 21.901845, lng: -100.899774 },
+  'Banco De Piedra': { lat: 21.896213, lng: -100.892558 },
+  'Banco Clemente': { lat: 21.903771, lng: -100.905912 },
+}
+
+export function coordenadasDeBanco(banco) {
+  const c = BANCO_COORDS[banco]
+  return c ? `${c.lat}, ${c.lng}` : ''
+}
+
 // Formato de cadenamiento (km+m), como se captura en tickets reales del sector
 // (ver docs/business/HALLAZGOS_MUESTRAS.md en el proyecto Volteo) — no un nombre
 // de lugar libre. Destinos y distancias tomados del mismo documento real de
